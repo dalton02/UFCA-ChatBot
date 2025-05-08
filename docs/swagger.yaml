@@ -1,0 +1,465 @@
+definitions:
+  postagensDto.ComentarioData:
+    properties:
+      conteudo:
+        type: string
+      criadoEm:
+        type: string
+      id:
+        type: integer
+      parenteId:
+        type: integer
+      postagemId:
+        description: Validado na url
+        type: integer
+      usuarioId:
+        type: integer
+    type: object
+  postagensDto.ComentarioDataComplete:
+    properties:
+      autor:
+        $ref: '#/definitions/postagensDto.UserPostagem'
+      conteudo:
+        type: string
+      criadoEm:
+        type: string
+      filhos:
+        items:
+          $ref: '#/definitions/postagensDto.ComentarioDataComplete'
+        type: array
+      id:
+        type: integer
+    type: object
+  postagensDto.ListagemPostagens:
+    properties:
+      limite:
+        type: integer
+      pagina:
+        type: integer
+      pesquisa:
+        type: string
+      postagem:
+        items:
+          $ref: '#/definitions/postagensDto.PostagemDataLista'
+        type: array
+      totalPaginas:
+        type: integer
+    type: object
+  postagensDto.NovaPostagem:
+    properties:
+      conteudo:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      tipo:
+        type: string
+      titulo:
+        type: string
+      usuarioId:
+        type: integer
+    type: object
+  postagensDto.PostagemDataComplete:
+    properties:
+      autor:
+        $ref: '#/definitions/postagensDto.UserPostagem'
+      comentarios:
+        items:
+          $ref: '#/definitions/postagensDto.ComentarioDataComplete'
+        type: array
+      conteudo:
+        type: string
+      criado_em:
+        type: string
+      id:
+        type: integer
+      reacao_autor:
+        type: string
+      reacoes:
+        additionalProperties:
+          type: integer
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
+      tipo:
+        type: string
+      titulo:
+        type: string
+    type: object
+  postagensDto.PostagemDataLista:
+    properties:
+      autor:
+        $ref: '#/definitions/postagensDto.UserPostagem'
+      comentarios:
+        type: integer
+      conteudo:
+        type: string
+      criado_em:
+        type: string
+      id:
+        type: integer
+      reacoes:
+        additionalProperties:
+          type: integer
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
+      tipo:
+        type: string
+      titulo:
+        type: string
+    type: object
+  postagensDto.ReacaoDataUnique:
+    properties:
+      tipo:
+        example: LIKE
+        type: string
+    type: object
+  postagensDto.UserPostagem:
+    properties:
+      avatar:
+        type: string
+      contexto:
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+      nome:
+        type: string
+    type: object
+  userDto.UserLogin:
+    properties:
+      login:
+        type: string
+      senha:
+        type: string
+    type: object
+  userDto.UserSignin:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      nome:
+        type: string
+      senha:
+        type: string
+    type: object
+host: localhost:4000
+info:
+  contact: {}
+  description: Esta é uma API simples usando Gin e Swagger.
+  title: Golang Documentação API 2.5
+  version: "1.0"
+paths:
+  /auth/cadastro-externo:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um usuário externo e retorna um token JWT com os dados
+        do usuário.
+      parameters:
+      - description: Dados de Cadastro
+        in: body
+        name: cadastro
+        required: true
+        schema:
+          $ref: '#/definitions/userDto.UserSignin'
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cadastro de Usuário Externo
+      tags:
+      - Autenticação
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um aluno e retorna um token JWT com os dados do usuário.
+      parameters:
+      - description: Dados de Login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/userDto.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Autenticação de Usuário Aluno
+      tags:
+      - Autenticação
+  /auth/login-externo:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um usuário externo e retorna um token JWT com os dados
+        do usuário.
+      parameters:
+      - description: Dados de Login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/userDto.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Autenticação de Usuário Externo
+      tags:
+      - Autenticação
+  /postagens/{postagemId}/comentar:
+    post:
+      consumes:
+      - application/json
+      description: Adiciona um comentário a uma postagem existente
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID da postagem
+        in: path
+        name: postagemId
+        required: true
+        type: integer
+      - description: Dados do comentário
+        in: body
+        name: comentario
+        required: true
+        schema:
+          $ref: '#/definitions/postagensDto.ComentarioData'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Comentário inserido com sucesso
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Adicionar um comentário a uma postagem
+      tags:
+      - Comentários
+  /postagens/{postagemId}/reagir:
+    post:
+      consumes:
+      - application/json
+      description: Adiciona ou atualiza uma reação (LIKE, FOGUINHO, AMEI, ODIEI) para
+        uma postagem específica
+      parameters:
+      - description: ID da postagem
+        in: path
+        name: postagemId
+        required: true
+        type: integer
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Dados da reação
+        in: body
+        name: reacao
+        required: true
+        schema:
+          $ref: '#/definitions/postagensDto.ReacaoDataUnique'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reação atualizada com sucesso
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Reação inserida com sucesso
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Adicionar ou atualizar uma reação a uma postagem
+      tags:
+      - Reações
+  /postagens/{titulo}:
+    get:
+      description: Pega uma postagem por titulo
+      parameters:
+      - description: Título da postagem
+        in: path
+        name: titulo
+        required: true
+        type: string
+      - description: 'Tipo de postagem: (alunoPost,ufcaPost)'
+        in: query
+        name: tipo
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Postagem a mostra
+          schema:
+            $ref: '#/definitions/postagensDto.PostagemDataComplete'
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Pegar postagem por titulo
+      tags:
+      - Postagens
+  /postagens/listar:
+    get:
+      description: Gera uma lista paginada com as postagens do blog
+      parameters:
+      - description: Pagina
+        in: query
+        name: pagina
+        type: string
+      - description: Limite por página
+        in: query
+        name: limite
+        type: string
+      - description: Pesquisa
+        in: query
+        name: pesquisa
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Listagem a mostra:'
+          schema:
+            $ref: '#/definitions/postagensDto.ListagemPostagens'
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Pegar listagem de postagens
+      tags:
+      - Postagens
+  /postagens/postar:
+    post:
+      consumes:
+      - application/json
+      description: Cria uma nova postagem no blog
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Dados da nova postagem
+        in: body
+        name: postagem
+        required: true
+        schema:
+          $ref: '#/definitions/postagensDto.NovaPostagem'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Postagem criada com sucesso
+          schema:
+            $ref: '#/definitions/postagensDto.PostagemDataComplete'
+        "400":
+          description: Erro ao processar a requisição
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Erro interno do servidor
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Criar uma nova postagem
+      tags:
+      - Postagens
+swagger: "2.0"
