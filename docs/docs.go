@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello-world": {
-            "get": {
-                "description": "Obtém um hello world mt bacana",
+        "/cadastrar": {
+            "post": {
+                "description": "Eu acho que cadastra um usuário",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,24 +25,60 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Tag de Exemplos"
+                    "Autenticação"
                 ],
-                "summary": "Rota de exemplo licor :D",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Cadastra um usuário",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/auth_dto.LoginRequestDto"
                         }
                     }
+                ],
+                "responses": {}
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Recebe login e senha para autenticar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Autentica um usuário",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_dto.LoginRequestDto"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "auth_dto.LoginRequestDto": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "senha": {
+                    "type": "string"
                 }
             }
         }
@@ -56,7 +92,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Minha API",
-	Description:      "Documentação do melhor chatbot do mundo",
+	Description:      "Documentação do melhor chatbot do mundo2",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

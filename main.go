@@ -10,7 +10,7 @@ import (
 
 // @title Minha API
 // @version 0.0.1
-// @description Documentação do melhor chatbot do mundo
+// @description Documentação do melhor chatbot do mundo2
 // @host localhost:4000
 // @BasePath /
 func main() {
