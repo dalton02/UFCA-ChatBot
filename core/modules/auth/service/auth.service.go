@@ -1,4 +1,4 @@
-package auth_module
+package auth_service
 
 func cadastrarUsuario() {
 

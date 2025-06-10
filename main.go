@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"licor_model/core/server"
 	"licor_model/core/server/shared"
 	"net/http"
 
-	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/MarceloPetrucio/go-scalar-api-reference"
 )
 
 // @title Minha API
@@ -15,17 +16,28 @@ import (
 // @BasePath /
 func main() {
 
-	go docs()
-
 	database, _ := server.InitConnection()
 	defer database.Close()
 	shared.SetDB(database)
+
+	http.HandleFunc("/reference", func(w http.ResponseWriter, r *http.Request) {
+		htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
+			SpecURL: "./docs/swagger.json",
+			CustomOptions: scalar.CustomOptions{
+				PageTitle: "Chatbot swagger",
+			},
+			DarkMode: true,
+			Layout:   scalar.LayoutModern,
+			Theme:    scalar.ThemeMoon,
+		})
+
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		fmt.Fprintln(w, htmlContent)
+	})
+
 	server.MainServer()
 
-}
-
-func docs() {
-	mux := http.NewServeMux()
-	mux.Handle("/docs/", httpSwagger.WrapHandler)
-	http.ListenAndServe(":4001", mux)
 }
