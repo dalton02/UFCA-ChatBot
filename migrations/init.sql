@@ -2,37 +2,37 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE IF NOT EXISTS documentos (
-    id bigserial PRIMARY KEY,
+    id serial PRIMARY KEY,
     conteudo TEXT,
     contexto VARCHAR(300),
     link VARCHAR(200),
     embedding vector(1024),
     criado_em TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
-    atualizado_em TIMESTAMP(3)
-);
+    atualizado_em TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+); 
 
 CREATE TABLE usuarios (
-    id SERIAL NOT NULL,
+    id serial PRIMARY KEY,
     login VARCHAR(100) NOT NULL,
     nome VARCHAR(100) NOT NULL,
-    senha VARCHAR(50),
-    CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
+    senha VARCHAR(50)
 );
 
 CREATE TABLE mensagens (
-    id SERIAL NOT NULL,
-    id_chat TEXT NOT NULL,
+    id serial PRIMARY KEY NOT NULL,
+    id_chat uuid NOT NULL,
+    conteudo TEXT NOT NULL,
     criado_em TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Mensagem_pkey" PRIMARY KEY ("id")
+    assistente BOOLEAN NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE chats (
-    id TEXT NOT NULL,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     id_usuario INTEGER NOT NULL,
+    titulo  TEXT NOT NULL,
     criado_em TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    atualizado_em TIMESTAMP(3),
-    CONSTRAINT "Chat_pkey" PRIMARY KEY ("id")
+    atualizado_em TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateIndex

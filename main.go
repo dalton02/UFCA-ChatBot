@@ -20,7 +20,7 @@ func main() {
 	defer database.Close()
 	shared.SetDB(database)
 
-	http.HandleFunc("/reference", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
 			SpecURL: "./docs/swagger.json",
 			CustomOptions: scalar.CustomOptions{

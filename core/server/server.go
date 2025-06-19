@@ -9,6 +9,8 @@ import (
 
 func MainServer() {
 
+	licor.Public[any, any]("/chat").Post(chat_controller.NovoChat)
+	licor.Public[any, any]("/chat/{idChat}").Get(chat_controller.BuscarChat)
 	licor.Public[any, any]("/chat/mensagem").Post(chat_controller.EnviarMensagem)
 	licor.Init("3000")
 
