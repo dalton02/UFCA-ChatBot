@@ -1,7 +1,7 @@
 package server
 
 import (
-	scrapper_service "licor_model/core/modules/scrapper/service"
+	chat_controller "licor_model/core/modules/chat/controller"
 	_ "licor_model/docs"
 
 	"github.com/dalton02/licor/licor"
@@ -9,7 +9,7 @@ import (
 
 func MainServer() {
 
-	scrapper_service.Init()
-	licor.Init("4000")
+	licor.Public[any, any]("/chat/mensagem").Post(chat_controller.EnviarMensagem)
+	licor.Init("3000")
 
 }

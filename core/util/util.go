@@ -97,3 +97,27 @@ func CommonToArray(data string) []string {
 	return array
 
 }
+
+func ConvertFloat32SliceToString(data [][]float32) string {
+	var outerBuilder strings.Builder
+	outerBuilder.WriteString("[") // Começa com o colchete externo
+
+	for i, innerSlice := range data {
+		if i > 0 {
+			outerBuilder.WriteString(",") // Adiciona vírgula entre os slices internos
+		}
+		outerBuilder.WriteString("[") // Começa com o colchete do slice interno
+
+		for j, val := range innerSlice {
+			if j > 0 {
+				outerBuilder.WriteString(",") // Adiciona vírgula entre os valores
+			}
+			// Converte float32 para string e adiciona aspas duplas
+			outerBuilder.WriteString(`"` + strconv.FormatFloat(float64(val), 'f', -1, 32) + `"`)
+		}
+		outerBuilder.WriteString("]") // Fecha o colchete do slice interno
+	}
+	outerBuilder.WriteString("]") // Fecha o colchete externo
+
+	return outerBuilder.String()
+}
