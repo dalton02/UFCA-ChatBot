@@ -9,11 +9,11 @@ import (
 func CriarChatDB(chat chat_dto.NovoChatDto) (string, error) {
 	var id string
 	query := `INSERT INTO chats (id_usuario,titulo) VALUES ($1, $2) RETURNING id`
-	result, err := shared.DB.Query(query, chat.IdUsuario, chat.Titulo)
+	result := shared.DB.QueryRow(query, chat.IdUsuario, chat.Titulo)
+	err := result.Scan(&id)
 	if err != nil {
 		return id, err
 	}
-	result.Scan(&id)
 	return id, nil
 }
 
@@ -43,6 +43,13 @@ func BuscarMensagensDB(id int) {
 
 }
 
-func SalvarMensagemDB(mensagem chat_dto.MensagemDto) {
-
+func SalvarMensagemDB(mensagem string, idChat string, assistente bool) (int, error) {
+	var id int
+	query := `INSERT INTO mensagens (id_chat,conteudo,assistente) VALUES ($1,$2,$3) RETURNING id`
+	result := shared.DB.QueryRow(query, idChat, mensagem, assistente)
+	err := result.Scan(&id)
+	if err != nil {
+		return id, err
+	}
+	return id, nil
 }

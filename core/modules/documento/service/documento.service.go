@@ -20,22 +20,24 @@ func BuscarDocumentoPorContextoDB(contexto string) (documento_dto.DocumentoDto, 
 	return documento, nil
 }
 
-func BuscarDocumentoPorSimilaridadeDB(conteudo string) (documento_dto.DocumentoDto, error) {
-	var documento documento_dto.DocumentoDto
+func BuscarDocumentoPorSimilaridadeDB(conteudo string) ([]documento_dto.DocumentoDto, error) {
+	var documentos []documento_dto.DocumentoDto
 	vetor, err := ollama_service.GerarEmbedding(conteudo)
 	if err != nil {
-		return documento, err
+		return documentos, err
 	}
 	value := builderQueryVetor(vetor)
-	query := `SELECT (contexto,conteudo,link) FROM documentos ORDER BY embedding <-> ` + value + ` LIMIT 5`
+	query := `SELECT contexto,conteudo,link FROM documentos ORDER BY embedding <-> ` + value + ` LIMIT 5`
 	result, err := shared.DB.Query(query)
 	if err != nil {
-		return documento, err
+		return documentos, err
 	}
 	for result.Next() {
-		result.Scan(&vetor)
+		var doc documento_dto.DocumentoDto
+		result.Scan(&doc.Contexto, &doc.Conteudo, &doc.Link)
+		documentos = append(documentos, doc)
 	}
-	return documento, nil
+	return documentos, nil
 }
 
 func SalvarEmbeddingDb(contexto string, conteudo string, link string, vetor [][]float32) error {

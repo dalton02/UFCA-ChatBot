@@ -16,7 +16,11 @@ import (
 // @BasePath /
 func main() {
 
-	database, _ := server.InitConnection()
+	database, err := server.InitConnection()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	defer database.Close()
 	shared.SetDB(database)
 

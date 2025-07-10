@@ -10,9 +10,13 @@ type MensagemDto struct {
 	Assistente bool      `json:"assistente"`
 }
 
+type NovaMensagemDto struct {
+	Conteudo string `json:"conteudo" validator:"required"`
+}
+
 type NovoChatDto struct {
-	IdUsuario int    `json:"id_usuario"`
-	Titulo    string `json:"titulo"`
+	IdUsuario int    `json:"id_usuario" validator:"required"`
+	Titulo    string `json:"titulo" validator:"required"`
 }
 
 type ChatDto struct {
@@ -24,7 +28,7 @@ type ChatDto struct {
 }
 
 type FiltrosDto struct {
-	Pagina     int    `json:"pagina"`
-	Quantidade int    `json:"quantidade"`
-	Pesquisa   string `json:"pesquisa"`
+	Pagina     int    `query:"pagina" validator:"optional"`
+	Quantidade int    `query:"quantidade" validator:"optional"`
+	Pesquisa   string `query:"pesquisa" validator:"optional"`
 }

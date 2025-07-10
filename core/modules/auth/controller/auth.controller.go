@@ -14,7 +14,8 @@ import (
 // @Produce json
 // @Param credentials body auth_dto.LoginRequestDto true "User credentials"
 // @Router /login [post]
-func Login(response http.ResponseWriter, request *http.Request) httpkit.HttpMessage {
+func Login(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
+
 	return httpkit.AppSuccess("Login realizado com sucesso", nil)
 }
 
@@ -26,6 +27,6 @@ func Login(response http.ResponseWriter, request *http.Request) httpkit.HttpMess
 // @Produce json
 // @Param credentials body auth_dto.LoginRequestDto true "User credentials"
 // @Router /cadastrar [post]
-func Cadastro(response http.ResponseWriter, request *http.Request) httpkit.HttpMessage {
+func Cadastro(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
 	return httpkit.AppSuccess("Cadastro realizado com sucesso", nil)
 }

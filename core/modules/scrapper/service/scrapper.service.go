@@ -18,12 +18,9 @@ func Init() {
 	collectorMain = colly.NewCollector()
 	collectorMateria = colly.NewCollector()
 
+	infoGeralCurso()
 	infoCadeirasCurso()
 	infoCadeiraDetalhes()
-
-	collectorMain.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
-	})
 
 	collectorMain.Visit("https://pt.wikiversity.org/wiki/CCT-UFCA/Ci%C3%AAncia_da_Computa%C3%A7%C3%A3o")
 }
@@ -60,10 +57,8 @@ func infoCadeiraDetalhes() {
 	})
 }
 
-func infoGeralCurso(c *colly.Collector) {
-	c.OnHTML("#mw-content-text", func(e *colly.HTMLElement) {
-
-		//2 Primeiros paragrafos compõe introdução do curso
+func infoGeralCurso() {
+	collectorMain.OnHTML("#mw-content-text", func(e *colly.HTMLElement) {
 		e.ForEach("p", func(i int, h *colly.HTMLElement) {
 			if i > 1 {
 				return
