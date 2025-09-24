@@ -43,31 +43,32 @@ func (r *ChatRepository) CreateChat(chat chat_dto.CreateChatDto) (id string, err
 }
 
 // Listar chats (filtros ainda não implementados)
-func (r *ChatRepository) ListChat(filtros chat_dto.ListChatDto) ([]chat_dto.ChatDto, error) {
+func (r *ChatRepository) ListChat(filtros chat_dto.QueryListChatDto) (response chat_dto.ListChatDto, err error) {
 	// Exemplo simples sem aplicar filtros ainda
-	sql, args, err := r.builder.From("chat").
+	sql, args, _ := r.builder.From("chat").
 		Select("id", "user_id", "title", "created_at", "updated_at").
 		ToSQL()
-	if err != nil {
-		return nil, err
-	}
 
 	rows, queryErr := r.executor.Query(sql, args...)
 	if queryErr != nil {
-		return nil, queryErr
+		return response, queryErr
 	}
 	defer rows.Close()
 
-	var chats []chat_dto.ChatDto
+	var chats []chat_dto.ChatDto = []chat_dto.ChatDto{}
 	for rows.Next() {
 		var chat chat_dto.ChatDto
 		if scanErr := rows.Scan(&chat.ID, &chat.UserID, &chat.Title, &chat.CreatedAt, &chat.UpdatedAt); scanErr != nil {
-			return nil, scanErr
+			return response, scanErr
 		}
 		chats = append(chats, chat)
 	}
 
-	return chats, nil
+	response.Data = chats
+	response.Page = filtros.Page
+	response.Limit = filtros.Limit
+
+	return response, nil
 }
 
 // Buscar chat por ID
@@ -103,19 +104,15 @@ func (r *ChatRepository) GetMessages(chatID int) ([]string, error) {
 }
 
 // Salvar mensagem
-func (r *ChatRepository) CreateMessage(mensagem string, chatID string, assistant bool) (int, error) {
-	sql, args, err := r.builder.Insert("message").
+func (r *ChatRepository) CreateMessage(mensagem string, chatID string, assistant bool) (id string, err error) {
+	id = ksuid.New().String()
+	sql, args, _ := r.builder.Insert("message").
 		Cols("id", "chat_id", "content", "assistant").
-		Vals(goqu.Vals{ksuid.New().String(), chatID, mensagem, assistant}).
-		Returning("id").ToSQL()
-	if err != nil {
-		return 0, err
-	}
+		Vals(goqu.Vals{id, chatID, mensagem, assistant}).
+		ToSQL()
 
-	var id int
-	row := r.executor.QueryRow(sql, args...)
-	if scanErr := row.Scan(&id); scanErr != nil {
-		return 0, scanErr
-	}
-	return id, nil
+	fmt.Println(sql)
+	_, err = r.executor.Exec(sql, args...)
+	fmt.Println(err)
+	return id, err
 }

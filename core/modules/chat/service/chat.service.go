@@ -28,7 +28,7 @@ func (s *ChatService) CreateChat(chat chat_dto.CreateChatDto) (id string, err er
 	return s.repo.CreateChat(chat)
 }
 
-func (s *ChatService) ListChat(filters chat_dto.ListChatDto) ([]chat_dto.ChatDto, error) {
+func (s *ChatService) ListChat(filters chat_dto.QueryListChatDto) (chat_dto.ListChatDto, error) {
 	return s.repo.ListChat(filters)
 }
 
@@ -46,6 +46,8 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 	if err != nil {
 		return response, err
 	}
+	//Salvando mensagem do usuário
+	_, err = s.repo.CreateMessage(message.Content, chatID, false)
 
 	var stringBuilder strings.Builder
 	stringBuilder.WriteString("REGRAS DO PROMPT:")
@@ -74,7 +76,8 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 		return response, err
 	}
 
-	//messageID,err := s.repo.CreateMessage(content, chatID, assistant)
+	//Salvando mensagem da IA
+	_, err = s.repo.CreateMessage(responseIA.Message.Content, chatID, true)
 
 	return chat_dto.MessageDto{
 		ID:        999,

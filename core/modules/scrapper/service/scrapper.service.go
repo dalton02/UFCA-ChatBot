@@ -12,7 +12,6 @@ import (
 
 var collectorMain *colly.Collector
 var collectorMateria *colly.Collector
-var docsService = document_service.NewDocumentService()
 
 func Init() {
 
@@ -73,6 +72,8 @@ func infoGeralCurso() {
 			builder.WriteString("INTRODUÇÃO CURSO CC")
 			builder.WriteString("-PARTE-")
 			builder.WriteString(strconv.Itoa(i))
+			var docsService = document_service.NewDocumentService()
+
 			err = docsService.UpsertDocument(builder.String(), h.Text, "Link", embedding)
 			if err != nil {
 				fmt.Println(err.Error())

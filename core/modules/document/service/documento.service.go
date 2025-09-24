@@ -28,7 +28,6 @@ func (s *DocumentService) GetDocumentsBySimiliarity(content string) (docs []docu
 		return docs, err
 	}
 	vetorFormatted := util.BuilderQueryVetor(vetor)
-
 	return s.repo.GetDocumentsBySimiliarity(vetorFormatted)
 }
 
@@ -36,10 +35,11 @@ func (s *DocumentService) UpsertDocument(context string, content string, link st
 	vetorSQL := util.BuilderQueryVetor(vetor)
 
 	document, err := s.GetDocumentByContext(context)
+
 	if err != nil {
-		err = s.repo.UpdateDocument(document, vetorSQL)
+		err = s.repo.CreateDocument(context, content, link, vetorSQL)
 	} else {
-		err = s.repo.CreateDocument(document, vetorSQL)
+		err = s.repo.UpdateDocument(document, vetorSQL)
 	}
 	return err
 }

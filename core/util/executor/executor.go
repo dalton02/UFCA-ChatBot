@@ -18,8 +18,6 @@ type Executor interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 	QueryRow(query string, args ...interface{}) *sql.Row
 	Prepare(query string) (*sql.Stmt, error)
-	GetDB() *sql.DB // ✅ Expor de forma controlada
-
 }
 
 // DBExecutor implementação concreta
@@ -30,10 +28,6 @@ type DBExecutor struct {
 
 func NewDBExecutor(tx *sql.Tx) Executor {
 	return &DBExecutor{db: shared.DB, tx: tx}
-}
-
-func (e *DBExecutor) GetDB() *sql.DB {
-	return e.db
 }
 
 // Métodos COM Context

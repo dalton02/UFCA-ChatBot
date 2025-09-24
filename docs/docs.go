@@ -57,18 +57,6 @@ const docTemplate = `{
                 "summary": "Listar chats",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Filtrar por usuário",
-                        "name": "userID",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filtrar por título",
-                        "name": "title",
-                        "in": "query"
-                    },
-                    {
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
@@ -81,6 +69,11 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1,
                         "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "total",
                         "in": "query"
                     }
                 ],
@@ -96,10 +89,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/chat_dto.ChatDto"
-                                            }
+                                            "$ref": "#/definitions/chat_dto.ListChatDto"
                                         }
                                     }
                                 }
@@ -349,6 +339,31 @@ const docTemplate = `{
             "properties": {
                 "content": {
                     "type": "string"
+                }
+            }
+        },
+        "chat_dto.ListChatDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat_dto.ChatDto"
+                    }
+                },
+                "limit": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1,
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

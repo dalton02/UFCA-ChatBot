@@ -29,6 +29,9 @@ type ChatDto struct {
 	util_dto.TimeStampDefaultDB
 }
 
-type ListChatDto struct {
+type QueryListChatDto struct {
 	util_dto.QueryPaginationDto
+}
+type ListChatDto struct {
+	util_dto.ResponsePaginatedDto[[]ChatDto]
 }

@@ -4,12 +4,12 @@ import (
 	chat_controller "licor_model/core/modules/chat/controller"
 	chat_service "licor_model/core/modules/chat/service"
 	document_service "licor_model/core/modules/document/service"
+	scrapper_service "licor_model/core/modules/scrapper/service"
 )
 
 func InitInjections() {
 
 	//Services
-
 	docService := document_service.NewDocumentService()
 	chatService := chat_service.NewChatService(docService)
 
@@ -25,4 +25,5 @@ func InitInjections() {
 	//Inicialização de Rotas
 	chatControl.Routes(routes.Groups.PublicGroup) //Aqui, as rotas de chats passam pelo middleware e grupo do JwtGroup
 
+	go scrapper_service.Init()
 }

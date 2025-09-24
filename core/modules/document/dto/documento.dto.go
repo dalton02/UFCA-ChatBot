@@ -5,5 +5,5 @@ type DocumentDto struct {
 	Content   string      `json:"content"`
 	Link      string      `json:"link"`
 	Embedding [][]float32 `json:"embedding"`
-	ID        int         `json:"id"`
+	ID        string      `json:"id"`
 }

@@ -112,11 +112,11 @@ func (c *ChatController) GetChat(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param query query chat_dto.ListChatDto true "Filtros"
-// @Success 200 {object} util_dto.AppResponse{data=[]chat_dto.ChatDto} "Lista de chats"
+// @Success 200 {object} util_dto.AppResponse{data=chat_dto.ListChatDto} "Lista de chats"
 // @Failure 404 {object} util_dto.AppResponse "Nenhum chat encontrado"
 // @Router /chats/list-chats [get]
 func (c *ChatController) ListChats(ctx *gin.Context) {
-	var filters chat_dto.ListChatDto
+	var filters chat_dto.QueryListChatDto
 
 	if err := interceptor.ValidateAndExtractQuery(ctx, &filters); err != nil {
 		interceptor.AppBadRequest(ctx, err.Error())
@@ -135,7 +135,7 @@ func (c *ChatController) Routes(g *gin.RouterGroup) {
 	g.POST("/chats/new-chat", c.CreateChat)
 	g.GET("/chats/list-chats", c.ListChats)
 
-	insideChat := g.Group("/chats/{chatID}")
+	insideChat := g.Group("/chats/:chatID")
 	{
 		insideChat.GET("/", c.GetChat)
 		insideChat.POST("/new-message", c.SendMessage)

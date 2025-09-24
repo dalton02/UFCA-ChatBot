@@ -1,5 +1,5 @@
 
-CREATE TABLE documento (
+CREATE TABLE document (
     id VARCHAR(32) PRIMARY KEY,
     content TEXT,
     context VARCHAR(300),

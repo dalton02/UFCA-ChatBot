@@ -32,6 +32,24 @@ definitions:
       content:
         type: string
     type: object
+  chat_dto.ListChatDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/chat_dto.ChatDto'
+        type: array
+      limit:
+        example: 10
+        maximum: 100
+        minimum: 1
+        type: integer
+      page:
+        example: 1
+        minimum: 1
+        type: integer
+      total:
+        type: integer
+    type: object
   util_dto.AppResponse:
     properties:
       data: {}
@@ -134,14 +152,6 @@ paths:
       - application/json
       description: Lista chats aplicando filtros opcionais
       parameters:
-      - description: Filtrar por usuário
-        in: query
-        name: userID
-        type: string
-      - description: Filtrar por título
-        in: query
-        name: title
-        type: string
       - example: 10
         in: query
         maximum: 100
@@ -153,6 +163,9 @@ paths:
         minimum: 1
         name: page
         type: integer
+      - in: query
+        name: total
+        type: integer
       produces:
       - application/json
       responses:
@@ -163,9 +176,7 @@ paths:
             - $ref: '#/definitions/util_dto.AppResponse'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/chat_dto.ChatDto'
-                  type: array
+                  $ref: '#/definitions/chat_dto.ListChatDto'
               type: object
         "404":
           description: Nenhum chat encontrado

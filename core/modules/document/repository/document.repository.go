@@ -6,6 +6,7 @@ import (
 	"licor_model/core/util/executor"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/segmentio/ksuid"
 )
 
 type DocumentRepository struct {
@@ -21,9 +22,11 @@ func NewDocumentRepository(exec executor.Executor) *DocumentRepository {
 }
 
 func (r *DocumentRepository) GetDocumentByContext(context string) (document_dto.DocumentDto, error) {
+
 	var document document_dto.DocumentDto
 	query := `SELECT context,content,link,id FROM document WHERE context=$1`
 	result := r.executor.QueryRow(query, context)
+
 	err := result.Scan(&document.Context, &document.Content, &document.Link, &document.ID)
 	if err != nil {
 		return document, err
@@ -45,9 +48,10 @@ func (r *DocumentRepository) GetDocumentsBySimiliarity(vetor string) (docs []doc
 	return docs, nil
 }
 
-func (r *DocumentRepository) CreateDocument(doc document_dto.DocumentDto, vetorSQL string) error {
-	queryInsert := `INSERT INTO document (context,content,link,embedding) VALUES ($1,$2,$3,` + vetorSQL + `)`
-	_, err := r.executor.Exec(queryInsert, doc.Context, doc.Content, doc.Link)
+func (r *DocumentRepository) CreateDocument(context string, content string, link string, vetorSQL string) error {
+	id := ksuid.New().String()
+	queryInsert := `INSERT INTO document (id,context,content,link,embedding) VALUES ($1,$2,$3,$4,` + vetorSQL + `)`
+	_, err := r.executor.Exec(queryInsert, id, context, content, link)
 	return err
 }
 
