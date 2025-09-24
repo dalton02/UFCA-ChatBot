@@ -1,34 +1,34 @@
 package chat_dto
 
-import "time"
+import (
+	util_dto "licor_model/core/util/dto"
+	"time"
+)
 
-type MensagemDto struct {
-	Id         int       `json:"id"`
-	IdChat     string    `json:"id_chat"`
-	Conteudo   string    `json:"conteudo"`
-	CriadoEm   time.Time `json:"criado_em"`
-	Assistente bool      `json:"assistente"`
+type MessageDto struct {
+	ID        int       `json:"id"`
+	ChatID    string    `json:"chatId"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"createdAt"`
+	Assistant bool      `json:"assistant"`
 }
 
-type NovaMensagemDto struct {
-	Conteudo string `json:"conteudo" validator:"required"`
+type CreateMensagemDto struct {
+	Content string `json:"content" validator:"required"`
 }
 
-type NovoChatDto struct {
-	IdUsuario int    `json:"id_usuario" validator:"required"`
-	Titulo    string `json:"titulo" validator:"required"`
+type CreateChatDto struct {
+	UserID string `json:"userId" validator:"required"`
+	Title  string `json:"title" validator:"required"`
 }
 
 type ChatDto struct {
-	Id           string    `json:"id"`
-	IdUsuario    int       `json:"id_usuario"`
-	CriadoEm     time.Time `json:"criado_em"`
-	AtualizadoEm time.Time `json:"atualizado_em"`
-	Titulo       string    `json:"titulo"`
+	ID     string `json:"id"`
+	UserID string `json:"userId"`
+	Title  string `json:"title"`
+	util_dto.TimeStampDefaultDB
 }
 
-type FiltrosDto struct {
-	Pagina     int    `query:"pagina" validator:"optional"`
-	Quantidade int    `query:"quantidade" validator:"optional"`
-	Pesquisa   string `query:"pesquisa" validator:"optional"`
+type ListChatDto struct {
+	util_dto.QueryPaginationDto
 }

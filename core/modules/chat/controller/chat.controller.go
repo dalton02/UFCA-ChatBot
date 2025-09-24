@@ -1,122 +1,143 @@
 package chat_controller
 
 import (
-	"encoding/json"
-	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_service "licor_model/core/modules/chat/service"
-	documento_service "licor_model/core/modules/documento/service"
-	ollama_dto "licor_model/core/modules/ollama/dto"
-	ollama_service "licor_model/core/modules/ollama/service"
-	"net/http"
-	"os"
-	"strings"
+	util_dto "licor_model/core/util/dto"
+	"licor_model/core/util/interceptor"
 	"time"
 
-	"github.com/dalton02/licor/httpkit"
+	"github.com/gin-gonic/gin"
 )
 
-func NovoChat(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
-
-	var chatInfo chat_dto.NovoChatDto
-	decoder := json.NewDecoder(request.Body)
-	err := decoder.Decode(&chatInfo)
-	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
-	}
-	id, err := chat_service.CriarChatDB(chatInfo)
-	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
-	}
-	return httpkit.AppSuccess("Chat criado com sucesso", chat_dto.ChatDto{
-		Id:           id,
-		IdUsuario:    chatInfo.IdUsuario,
-		CriadoEm:     time.Now(),
-		AtualizadoEm: time.Now(),
-		Titulo:       chatInfo.Titulo,
-	})
-
+type ChatController struct {
+	chatService *chat_service.ChatService
 }
 
-func EnviarMensagem(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
-	params, err := httpkit.GetUrlParams(request)
+func NewController(chatService *chat_service.ChatService) *ChatController {
+	return &ChatController{
+		chatService: chatService,
+	}
+}
+
+// CreateChat godoc
+// @Summary Criar novo chat
+// @Description Cria um novo chat com título e usuário associado
+// @Tags Chats
+// @Accept json
+// @Produce json
+// @Param request body chat_dto.CreateChatDto true "Dados para criar chat"
+// @Success 200 {object} util_dto.AppResponse{data=chat_dto.ChatDto} "Chat criado com sucesso"
+// @Failure 400 {object} util_dto.AppResponse "Erro de validação ou requisição"
+// @Router /chats/new-chat [post]
+func (c *ChatController) CreateChat(ctx *gin.Context) {
+	var createChat chat_dto.CreateChatDto
+
+	if err := interceptor.ValidateAndExtract(ctx, &createChat); err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+	id, err := c.chatService.CreateChat(createChat)
+
 	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
-	}
-	idChat := params.Param["idChat"]
-
-	var mensagem chat_dto.NovaMensagemDto
-	decoder := json.NewDecoder(request.Body)
-	decoder.Decode(&mensagem)
-
-	documentos, err := documento_service.BuscarDocumentoPorSimilaridadeDB(mensagem.Conteudo)
-	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
 	}
 
-	var stringBuilder strings.Builder
-	stringBuilder.WriteString("REGRAS DO PROMPT:")
-	stringBuilder.WriteString("\n1 - Nunca envie links para websites em sua resposta ")
-	stringBuilder.WriteString("\n2 - Sempre mantenha o foco do assunto a respeito da universidade e alunos")
-	stringBuilder.WriteString("\n3 - Responda a pergunta baseando-se nos seguintes dados: ")
-	stringBuilder.WriteString("\n----------INICIO DOS DADOS-----------")
-	for _, doc := range documentos {
-		stringBuilder.WriteString("\n-----------------------------")
-		stringBuilder.WriteString(doc.Conteudo)
-		stringBuilder.WriteString("\n-----------------------------")
-	}
-	stringBuilder.WriteString("\n------ FIM DOS DADOS-------")
-	stringBuilder.WriteString("\nPergunta do usuário: ")
-	stringBuilder.WriteString(mensagem.Conteudo)
-	respostaIA, err := ollama_service.SendRequest(ollama_dto.RequestChatAI{
-		Model: os.Getenv("OLLAMA_MODEL"),
-		Messages: []ollama_dto.MessageChatAI{
-			{
-				Content: stringBuilder.String(),
-				Role:    "user",
-			},
+	interceptor.AppSuccess(ctx, "Chat criado com sucesso", chat_dto.ChatDto{
+		ID: id,
+		TimeStampDefaultDB: util_dto.TimeStampDefaultDB{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		},
-	})
-	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
-	}
-
-	// idMensagem, err := chat_service.SalvarMensagemDB(mensagem.Conteudo, idChat, false)
-	// if err != nil {
-	// 	if strings.Contains(err.Error(), "foreign key constraint") {
-	// 		return httpkit.AppNotFound("Chat não encontrado")
-	// 	}
-	// 	return httpkit.AppBadRequest(err.Error())
-	// }
-
-	return httpkit.AppSuccess("Operação realizada com sucesso", chat_dto.MensagemDto{
-		Id:         999,
-		IdChat:     idChat,
-		Conteudo:   respostaIA.Message.Content,
-		CriadoEm:   time.Now(),
-		Assistente: true,
+		UserID: createChat.UserID,
+		Title:  createChat.Title,
 	})
 
 }
 
-func BuscarMensagens(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
+// SendMessage godoc
+// @Summary Enviar mensagem para um chat
+// @Description Envia uma nova mensagem dentro de um chat existente
+// @Tags Chats
+// @Accept json
+// @Produce json
+// @Param chatID path string true "ID do chat"
+// @Param request body chat_dto.CreateMensagemDto true "Dados da mensagem"
+// @Success 200 {object} util_dto.AppResponse{data=string} "Resposta da IA"
+// @Failure 400 {object} util_dto.AppResponse "Erro de validação ou requisição"
+// @Router /chats/{chatID}/new-message [post]
+func (c *ChatController) SendMessage(ctx *gin.Context) {
+	var message chat_dto.CreateMensagemDto
 
-	return httpkit.AppSuccess("Tudo certo aqui!", make(map[string]interface{}))
+	if err := interceptor.ValidateAndExtract(ctx, &message); err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
 
+	chatID, _ := ctx.Params.Get("chatID")
+
+	response, err := c.chatService.SaveMessage(message, chatID)
+
+	if err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+	interceptor.AppSuccess(ctx, "Resposta da IA", response)
 }
 
-func BuscarChat(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
-
-	params, err := httpkit.GetUrlParams(request)
+// GetChat godoc
+// @Summary Buscar chat por ID
+// @Description Retorna os detalhes de um chat específico
+// @Tags Chats
+// @Produce json
+// @Param chatID path string true "ID do chat"
+// @Success 200 {object} util_dto.AppResponse{data=chat_dto.ChatDto} "Chat encontrado"
+// @Failure 404 {object} util_dto.AppResponse "Nenhum chat encontrado"
+// @Router /chats/{chatID}/ [get]
+func (c *ChatController) GetChat(ctx *gin.Context) {
+	chatID, _ := ctx.Params.Get("chatID")
+	result, err := c.chatService.GetChatByID(chatID)
 	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
+		interceptor.AppNotFound(ctx, err.Error())
+		return
 	}
-	idChat := params.Param["idChat"]
-	fmt.Println(idChat)
-	result, err := chat_service.BuscarChatDB(idChat)
-	if err != nil {
-		return httpkit.AppBadRequest(err.Error())
-	}
-	return httpkit.AppSuccess("Chat criado com sucesso", result)
+	interceptor.AppSuccess(ctx, "Chat encontrado", result)
+}
 
+// ListChats godoc
+// @Summary Listar chats
+// @Description Lista chats aplicando filtros opcionais
+// @Tags Chats
+// @Accept json
+// @Produce json
+// @Param query query chat_dto.ListChatDto true "Filtros"
+// @Success 200 {object} util_dto.AppResponse{data=[]chat_dto.ChatDto} "Lista de chats"
+// @Failure 404 {object} util_dto.AppResponse "Nenhum chat encontrado"
+// @Router /chats/list-chats [get]
+func (c *ChatController) ListChats(ctx *gin.Context) {
+	var filters chat_dto.ListChatDto
+
+	if err := interceptor.ValidateAndExtractQuery(ctx, &filters); err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+
+	result, err := c.chatService.ListChat(filters)
+	if err != nil {
+		interceptor.AppNotFound(ctx, err.Error())
+		return
+	}
+	interceptor.AppSuccess(ctx, "Chats encontrados", result)
+}
+func (c *ChatController) Routes(g *gin.RouterGroup) {
+
+	g.POST("/chats/new-chat", c.CreateChat)
+	g.GET("/chats/list-chats", c.ListChats)
+
+	insideChat := g.Group("/chats/{chatID}")
+	{
+		insideChat.GET("/", c.GetChat)
+		insideChat.POST("/new-message", c.SendMessage)
+	}
 }

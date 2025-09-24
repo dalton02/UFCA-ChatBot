@@ -121,3 +121,24 @@ func ConvertFloat32SliceToString(data [][]float32) string {
 
 	return outerBuilder.String()
 }
+
+func BuilderQueryVetor(vetor [][]float32) string {
+	builderVetores := strings.Builder{}
+	for i, innerSlice := range vetor {
+		builderVetores.WriteString("(")
+		builderVetores.WriteString(`'[`)
+		for j, val := range innerSlice {
+			builderVetores.WriteString(strconv.FormatFloat(float64(val), 'f', -1, 32))
+			if j < len(innerSlice)-1 {
+				builderVetores.WriteString(",")
+			}
+		}
+
+		builderVetores.WriteString(`]'`)
+		builderVetores.WriteString(")")
+		if i < len(vetor)-1 {
+			builderVetores.WriteString(",")
+		}
+	}
+	return builderVetores.String()
+}

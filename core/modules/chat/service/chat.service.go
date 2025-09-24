@@ -1,55 +1,86 @@
 package chat_service
 
 import (
-	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
-	"licor_model/core/server/shared"
+	chat_repository "licor_model/core/modules/chat/repository"
+	document_service "licor_model/core/modules/document/service"
+	ollama_dto "licor_model/core/modules/ollama/dto"
+	ollama_service "licor_model/core/modules/ollama/service"
+	"licor_model/core/util/executor"
+	"os"
+	"strings"
+	"time"
 )
 
-func CriarChatDB(chat chat_dto.NovoChatDto) (string, error) {
-	var id string
-	query := `INSERT INTO chats (id_usuario,titulo) VALUES ($1, $2) RETURNING id`
-	result := shared.DB.QueryRow(query, chat.IdUsuario, chat.Titulo)
-	err := result.Scan(&id)
-	if err != nil {
-		return id, err
-	}
-	return id, nil
+type ChatService struct {
+	repo       *chat_repository.ChatRepository
+	docService *document_service.DocumentService
 }
 
-func ListarChatDB(filtros chat_dto.FiltrosDto) {
-
+func NewChatService(docsService *document_service.DocumentService) *ChatService {
+	return &ChatService{
+		repo:       chat_repository.NewChatRepository(executor.NewDBExecutor(nil)),
+		docService: docsService,
+	}
 }
 
-func BuscarChatDB(id string) (chat_dto.ChatDto, error) {
-	var chat chat_dto.ChatDto
-	query := `SELECT id,id_usuario,titulo,criado_em,atualizado_em FROM chats WHERE id = $1`
-	result, err := shared.DB.Query(query, id)
-	if err != nil {
-		return chat, err
-	}
-	if !result.Next() {
-		return chat, fmt.Errorf("nenhum chat encontrado")
-	}
-	err = result.Scan(&chat.Id, &chat.IdUsuario, &chat.Titulo, &chat.CriadoEm, &chat.AtualizadoEm)
-	if err != nil {
-		return chat, err
-	}
-	return chat, nil
-
+func (s *ChatService) CreateChat(chat chat_dto.CreateChatDto) (id string, err error) {
+	return s.repo.CreateChat(chat)
 }
 
-func BuscarMensagensDB(id int) {
-
+func (s *ChatService) ListChat(filters chat_dto.ListChatDto) ([]chat_dto.ChatDto, error) {
+	return s.repo.ListChat(filters)
 }
 
-func SalvarMensagemDB(mensagem string, idChat string, assistente bool) (int, error) {
-	var id int
-	query := `INSERT INTO mensagens (id_chat,conteudo,assistente) VALUES ($1,$2,$3) RETURNING id`
-	result := shared.DB.QueryRow(query, idChat, mensagem, assistente)
-	err := result.Scan(&id)
+func (s *ChatService) GetChatByID(id string) (chat_dto.ChatDto, error) {
+	return s.repo.GetChatByID(id)
+}
+
+func (s *ChatService) GetMessages(id int) ([]string, error) {
+	return s.repo.GetMessages(id)
+}
+
+func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID string) (response chat_dto.MessageDto, err error) {
+
+	documents, err := s.docService.GetDocumentsBySimiliarity(message.Content)
 	if err != nil {
-		return id, err
+		return response, err
 	}
-	return id, nil
+
+	var stringBuilder strings.Builder
+	stringBuilder.WriteString("REGRAS DO PROMPT:")
+	stringBuilder.WriteString("\n1 - Nunca envie links para websites em sua resposta ")
+	stringBuilder.WriteString("\n2 - Sempre mantenha o foco do assunto a respeito da universidade e alunos")
+	stringBuilder.WriteString("\n3 - Responda a pergunta baseando-se nos seguintes dados: ")
+	stringBuilder.WriteString("\n----------INICIO DOS DADOS-----------")
+	for _, doc := range documents {
+		stringBuilder.WriteString("\n-----------------------------")
+		stringBuilder.WriteString(doc.Content)
+		stringBuilder.WriteString("\n-----------------------------")
+	}
+	stringBuilder.WriteString("\n------ FIM DOS DADOS-------")
+	stringBuilder.WriteString("\nPergunta do usuário: ")
+	stringBuilder.WriteString(message.Content)
+	responseIA, err := ollama_service.SendRequest(ollama_dto.RequestChatAI{
+		Model: os.Getenv("OLLAMA_MODEL"),
+		Messages: []ollama_dto.MessageChatAI{
+			{
+				Content: stringBuilder.String(),
+				Role:    "user",
+			},
+		},
+	})
+	if err != nil {
+		return response, err
+	}
+
+	//messageID,err := s.repo.CreateMessage(content, chatID, assistant)
+
+	return chat_dto.MessageDto{
+		ID:        999,
+		ChatID:    chatID,
+		Content:   responseIA.Message.Content,
+		CreatedAt: time.Now(),
+		Assistant: true,
+	}, nil
 }

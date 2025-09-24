@@ -1,17 +1,20 @@
 
-CREATE TABLE mensagens (
-    id serial PRIMARY KEY NOT NULL,
-    id_chat uuid NOT NULL,
-    conteudo TEXT NOT NULL,
-    criado_em TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    assistente BOOLEAN NOT NULL
-);
 
 -- CreateTable
-CREATE TABLE chats (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    id_usuario INTEGER NOT NULL,
-    titulo  TEXT NOT NULL,
-    criado_em TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    atualizado_em TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE chat (
+    id VARCHAR(32) PRIMARY KEY,
+    user_id VARCHAR(32) NOT NULL,
+    title  TEXT NOT NULL,
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES "user"(id)
+);
+
+CREATE TABLE message (
+    id VARCHAR(32) PRIMARY KEY NOT NULL,
+    chat_id VARCHAR(32) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    assistant BOOLEAN NOT NULL,
+    FOREIGN KEY (chat_id) REFERENCES chat(id)
 );

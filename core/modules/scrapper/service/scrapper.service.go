@@ -2,7 +2,7 @@ package scrapper_service
 
 import (
 	"fmt"
-	documento_service "licor_model/core/modules/documento/service"
+	document_service "licor_model/core/modules/document/service"
 	ollama_service "licor_model/core/modules/ollama/service"
 	"strconv"
 	"strings"
@@ -12,6 +12,7 @@ import (
 
 var collectorMain *colly.Collector
 var collectorMateria *colly.Collector
+var docsService = document_service.NewDocumentService()
 
 func Init() {
 
@@ -72,7 +73,7 @@ func infoGeralCurso() {
 			builder.WriteString("INTRODUÇÃO CURSO CC")
 			builder.WriteString("-PARTE-")
 			builder.WriteString(strconv.Itoa(i))
-			err = documento_service.SalvarEmbeddingDb(builder.String(), h.Text, "Link", embedding)
+			err = docsService.UpsertDocument(builder.String(), h.Text, "Link", embedding)
 			if err != nil {
 				fmt.Println(err.Error())
 				return

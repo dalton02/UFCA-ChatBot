@@ -42,6 +42,237 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/chats/list-chats": {
+            "get": {
+                "description": "Lista chats aplicando filtros opcionais",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chats"
+                ],
+                "summary": "Listar chats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filtrar por usuário",
+                        "name": "userID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filtrar por título",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 10,
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1,
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de chats",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/util_dto.AppResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/chat_dto.ChatDto"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Nenhum chat encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/util_dto.AppResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/new-chat": {
+            "post": {
+                "description": "Cria um novo chat com título e usuário associado",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chats"
+                ],
+                "summary": "Criar novo chat",
+                "parameters": [
+                    {
+                        "description": "Dados para criar chat",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chat_dto.CreateChatDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chat criado com sucesso",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/util_dto.AppResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/chat_dto.ChatDto"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação ou requisição",
+                        "schema": {
+                            "$ref": "#/definitions/util_dto.AppResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/{chatID}/": {
+            "get": {
+                "description": "Retorna os detalhes de um chat específico",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chats"
+                ],
+                "summary": "Buscar chat por ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do chat",
+                        "name": "chatID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chat encontrado",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/util_dto.AppResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/chat_dto.ChatDto"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Nenhum chat encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/util_dto.AppResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/{chatID}/new-message": {
+            "post": {
+                "description": "Envia uma nova mensagem dentro de um chat existente",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chats"
+                ],
+                "summary": "Enviar mensagem para um chat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do chat",
+                        "name": "chatID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados da mensagem",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chat_dto.CreateMensagemDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resposta da IA",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/util_dto.AppResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação ou requisição",
+                        "schema": {
+                            "$ref": "#/definitions/util_dto.AppResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Recebe login e senha para autenticar",
@@ -81,18 +312,76 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "chat_dto.ChatDto": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat_dto.CreateChatDto": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "chat_dto.CreateMensagemDto": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
+        },
+        "util_dto.AppResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "statusCode": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer Auth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.0.1",
-	Host:             "localhost:4000",
+	Version:          "@0.0.1",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Minha API",
-	Description:      "Documentação do melhor chatbot do mundo2",
+	Title:            "Golang CHATBOT",
+	Description:      "Documentação do melhor chatbot universitario",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

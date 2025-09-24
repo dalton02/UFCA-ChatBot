@@ -1,1 +1,1 @@
-DROP TABLE documentos;
+DROP TABLE documento;

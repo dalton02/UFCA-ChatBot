@@ -7,12 +7,44 @@ definitions:
       senha:
         type: string
     type: object
-host: localhost:4000
+  chat_dto.ChatDto:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: string
+    type: object
+  chat_dto.CreateChatDto:
+    properties:
+      title:
+        type: string
+      userId:
+        type: string
+    type: object
+  chat_dto.CreateMensagemDto:
+    properties:
+      content:
+        type: string
+    type: object
+  util_dto.AppResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
 info:
   contact: {}
-  description: Documentação do melhor chatbot do mundo2
-  title: Minha API
-  version: 0.0.1
+  description: Documentação do melhor chatbot universitario
+  title: Golang CHATBOT
+  version: '@0.0.1'
 paths:
   /cadastrar:
     post:
@@ -32,6 +64,147 @@ paths:
       summary: Cadastra um usuário
       tags:
       - Autenticação
+  /chats/{chatID}/:
+    get:
+      description: Retorna os detalhes de um chat específico
+      parameters:
+      - description: ID do chat
+        in: path
+        name: chatID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat encontrado
+          schema:
+            allOf:
+            - $ref: '#/definitions/util_dto.AppResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_dto.ChatDto'
+              type: object
+        "404":
+          description: Nenhum chat encontrado
+          schema:
+            $ref: '#/definitions/util_dto.AppResponse'
+      summary: Buscar chat por ID
+      tags:
+      - Chats
+  /chats/{chatID}/new-message:
+    post:
+      consumes:
+      - application/json
+      description: Envia uma nova mensagem dentro de um chat existente
+      parameters:
+      - description: ID do chat
+        in: path
+        name: chatID
+        required: true
+        type: string
+      - description: Dados da mensagem
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/chat_dto.CreateMensagemDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resposta da IA
+          schema:
+            allOf:
+            - $ref: '#/definitions/util_dto.AppResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Erro de validação ou requisição
+          schema:
+            $ref: '#/definitions/util_dto.AppResponse'
+      summary: Enviar mensagem para um chat
+      tags:
+      - Chats
+  /chats/list-chats:
+    get:
+      consumes:
+      - application/json
+      description: Lista chats aplicando filtros opcionais
+      parameters:
+      - description: Filtrar por usuário
+        in: query
+        name: userID
+        type: string
+      - description: Filtrar por título
+        in: query
+        name: title
+        type: string
+      - example: 10
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - example: 1
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de chats
+          schema:
+            allOf:
+            - $ref: '#/definitions/util_dto.AppResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/chat_dto.ChatDto'
+                  type: array
+              type: object
+        "404":
+          description: Nenhum chat encontrado
+          schema:
+            $ref: '#/definitions/util_dto.AppResponse'
+      summary: Listar chats
+      tags:
+      - Chats
+  /chats/new-chat:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo chat com título e usuário associado
+      parameters:
+      - description: Dados para criar chat
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/chat_dto.CreateChatDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Chat criado com sucesso
+          schema:
+            allOf:
+            - $ref: '#/definitions/util_dto.AppResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/chat_dto.ChatDto'
+              type: object
+        "400":
+          description: Erro de validação ou requisição
+          schema:
+            $ref: '#/definitions/util_dto.AppResponse'
+      summary: Criar novo chat
+      tags:
+      - Chats
   /login:
     post:
       consumes:
@@ -50,4 +223,9 @@ paths:
       summary: Autentica um usuário
       tags:
       - Autenticação
+securityDefinitions:
+  Bearer Auth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

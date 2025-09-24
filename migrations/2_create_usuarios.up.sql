@@ -1,7 +1,7 @@
 
-CREATE TABLE usuarios (
-    id serial PRIMARY KEY,
+CREATE TABLE "user" (
+    id VARCHAR(32) PRIMARY KEY,
     login VARCHAR(100) NOT NULL,
-    nome VARCHAR(100) NOT NULL,
-    senha VARCHAR(50)
+    name VARCHAR(200) NOT NULL,
+    password VARCHAR(100) NOT NULL
 );
