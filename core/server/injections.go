@@ -12,6 +12,7 @@ func InitInjections() {
 	//Services
 	docService := document_service.NewDocumentService()
 	chatService := chat_service.NewChatService(docService)
+	scrapperService := scrapper_service.NewScrapperService(docService)
 
 	//Controllers
 	chatControl := chat_controller.NewController(chatService)
@@ -25,5 +26,5 @@ func InitInjections() {
 	//Inicialização de Rotas
 	chatControl.Routes(routes.Groups.PublicGroup) //Aqui, as rotas de chats passam pelo middleware e grupo do JwtGroup
 
-	go scrapper_service.Init()
+	scrapperService.Init()
 }
