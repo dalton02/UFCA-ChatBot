@@ -1,13 +1,88 @@
 package auth_service
 
-func cadastrarUsuario() {
+import (
+	"errors"
+	auth_dto "licor_model/core/modules/auth/dto"
+	auth_repository "licor_model/core/modules/auth/repository"
+	guard_util "licor_model/core/util/jwt"
 
+	"golang.org/x/crypto/bcrypt"
+)
+
+type AuthService struct {
+	repo *auth_repository.AuthRepository
 }
 
-func pesquisarUsuario() {
-
+func NewAuthService(repo *auth_repository.AuthRepository) *AuthService {
+	return &AuthService{repo: repo}
 }
 
-func compararSenhas() {
+func (s *AuthService) Register(registerDto auth_dto.RegisterRequestDto) (auth_dto.AuthResponseDto, error) {
+	var response auth_dto.AuthResponseDto
 
+	exists, err := s.repo.EmailExists(registerDto.Email)
+	if err != nil {
+		return response, err
+	}
+
+	if exists {
+		return response, errors.New("email ja cadastrado")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerDto.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return response, err
+	}
+
+	userID, err := s.repo.CreateUser(registerDto, string(hashedPassword))
+	if err != nil {
+		return response, err
+	}
+
+	user, err := s.repo.GetUserByID(userID)
+	if err != nil {
+		return response, err
+	}
+
+	jwtClaims := auth_dto.JWTClaimsDto{
+		UserID: user.ID,
+		Email:  user.Email,
+	}
+
+	token, err := guard_util.GenerateJwt(jwtClaims, 1440)
+	if err != nil {
+		return response, err
+	}
+
+	response.Token = token
+	response.User = user
+	return response, nil
+}
+
+func (s *AuthService) Login(loginDto auth_dto.LoginRequestDto) (auth_dto.AuthResponseDto, error) {
+	var response auth_dto.AuthResponseDto
+
+	user, hashedPassword, err := s.repo.GetUserByEmail(loginDto.Email)
+	if err != nil {
+		return response, errors.New("credenciais inválidas")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginDto.Password))
+	if err != nil {
+		return response, errors.New("credenciais inválidas")
+	}
+
+	jwtClaims := auth_dto.JWTClaimsDto{
+		UserID: user.ID,
+		Email:  user.Email,
+	}
+
+	token, err := guard_util.GenerateJwt(jwtClaims, 1440)
+	if err != nil {
+		return response, err
+	}
+
+	response.Token = token
+	response.User = user
+	return response, nil
 }

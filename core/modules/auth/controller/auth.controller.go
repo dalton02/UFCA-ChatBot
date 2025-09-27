@@ -1,32 +1,61 @@
 package auth_controller
 
 import (
-	"net/http"
+	auth_dto "licor_model/core/modules/auth/dto"
+	auth_service "licor_model/core/modules/auth/service"
+	"licor_model/core/util/interceptor"
 
-	"github.com/dalton02/licor/httpkit"
+	"github.com/gin-gonic/gin"
 )
 
-// Login do usuário
-// @Summary Autentica um usuário
-// @Description Recebe login e senha para autenticar
-// @Tags Autenticação
-// @Accept json
-// @Produce json
-// @Param credentials body auth_dto.LoginRequestDto true "User credentials"
-// @Router /login [post]
-func Login(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
+// refiz o controller pq agora a gnt ta usando o gin
 
-	return httpkit.AppSuccess("Login realizado com sucesso", nil)
+type AuthController struct {
+	authService *auth_service.AuthService
 }
 
-// Cadastro do usuário
-// @Summary Cadastra um usuário
-// @Description Eu acho que cadastra um usuário
-// @Tags Autenticação
-// @Accept json
-// @Produce json
-// @Param credentials body auth_dto.LoginRequestDto true "User credentials"
-// @Router /cadastrar [post]
-func Cadastro(response http.ResponseWriter, request *http.Request) (httpkit.HttpMessage, bool) {
-	return httpkit.AppSuccess("Cadastro realizado com sucesso", nil)
+func NewAuthController(authService *auth_service.AuthService) *AuthController {
+	return &AuthController{authService: authService}
+}
+
+func (c *AuthController) Login(ctx *gin.Context) {
+	var loginDto auth_dto.LoginRequestDto
+
+	if err := interceptor.ValidateAndExtract(ctx, &loginDto); err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+
+	response, err := c.authService.Login(loginDto)
+	if err != nil {
+		interceptor.AppUnauthorized(ctx, err.Error())
+		return
+	}
+
+	interceptor.AppSuccess(ctx, "Login com sucesso", response)
+}
+
+func (c *AuthController) Register(ctx *gin.Context) {
+	var registerDto auth_dto.RegisterRequestDto
+
+	if err := interceptor.ValidateAndExtract(ctx, &registerDto); err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+
+	response, err := c.authService.Register(registerDto)
+	if err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+
+	interceptor.AppCreated(ctx, "Usuário cadastrado com sucesso", response)
+}
+
+func (c *AuthController) Routes(g *gin.RouterGroup) {
+	authGroup := g.Group("/auth")
+	{
+		authGroup.POST("/login", c.Login)
+		authGroup.POST("/register", c.Register)
+	}
 }
