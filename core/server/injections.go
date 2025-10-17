@@ -15,7 +15,6 @@ func InitInjections() {
 	//Services
 	docService := document_service.NewDocumentService()
 	chatService := chat_service.NewChatService(docService)
-	scrapperService := scrapper_service.NewScrapperService(docService)
 	authService := auth_service.NewAuthService()
 
 	//Middlewares
@@ -36,5 +35,6 @@ func InitInjections() {
 	chatControl.Routes(routes.Groups.JwtGroup)
 	authControl.Routes(routes.Groups.PublicGroup)
 
+	scrapperService := scrapper_service.NewScrapperService(docService)
 	scrapperService.Init()
 }
