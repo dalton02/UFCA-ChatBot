@@ -37,7 +37,10 @@ func (c *ChatController) CreateChat(ctx *gin.Context) {
 		interceptor.AppBadRequest(ctx, err.Error())
 		return
 	}
-	id, err := c.chatService.CreateChat(createChat)
+
+	userID := ctx.MustGet("userID").(string)
+
+	id, err := c.chatService.CreateChat(createChat, userID)
 
 	if err != nil {
 		interceptor.AppBadRequest(ctx, err.Error())
@@ -45,13 +48,13 @@ func (c *ChatController) CreateChat(ctx *gin.Context) {
 	}
 
 	interceptor.AppSuccess(ctx, "Chat criado com sucesso", chat_dto.ChatDto{
-		ID: id,
+		ID:     id,
+		UserID: userID,
 		TimeStampDefaultDB: util_dto.TimeStampDefaultDB{
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},
-		UserID: createChat.UserID,
-		Title:  createChat.Title,
+		Title: createChat.Title,
 	})
 
 }

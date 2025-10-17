@@ -39,6 +39,8 @@ func (s *DocumentService) UpsertDocument(context string, content string, link st
 	if err != nil {
 		err = s.repo.CreateDocument(context, content, link, vetorSQL)
 	} else {
+		document.Link = link
+		document.Content = content
 		err = s.repo.UpdateDocument(document, vetorSQL)
 	}
 	return err

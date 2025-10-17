@@ -18,6 +18,14 @@ func NewAuthController(authService *auth_service.AuthService) *AuthController {
 	return &AuthController{authService: authService}
 }
 
+// @Summary		Login
+// @Description	Autentica um usuário com email e senha
+// @Tags			Auth
+// @Accept			json
+// @Produce		json
+// @Param			body	body		auth_dto.LoginRequestDto			true	"Credenciais de login"
+// @Success		200		{object}	util_dto.AppResponse{data=auth_dto.AuthResponseDto}	"Retorna um token JWT"
+// @Router			/auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
 	var loginDto auth_dto.LoginRequestDto
 
@@ -35,6 +43,14 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	interceptor.AppSuccess(ctx, "Login com sucesso", response)
 }
 
+// @Summary		Cadastro de usuário
+// @Description	Autentica um usuário com email e senha
+// @Tags			Auth
+// @Accept			json
+// @Produce		json
+// @Param			body	body		auth_dto.RegisterRequestDto			true	"Credenciais de login"
+// @Success		200		{object}	util_dto.AppResponse{data=auth_dto.AuthResponseDto}	"Retorna um token JWT"
+// @Router			/auth/register [post]
 func (c *AuthController) Register(ctx *gin.Context) {
 	var registerDto auth_dto.RegisterRequestDto
 

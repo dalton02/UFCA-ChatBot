@@ -24,8 +24,8 @@ func NewChatService(docsService *document_service.DocumentService) *ChatService 
 	}
 }
 
-func (s *ChatService) CreateChat(chat chat_dto.CreateChatDto) (id string, err error) {
-	return s.repo.CreateChat(chat)
+func (s *ChatService) CreateChat(chat chat_dto.CreateChatDto, userID string) (id string, err error) {
+	return s.repo.CreateChat(chat, userID)
 }
 
 func (s *ChatService) ListChat(filters chat_dto.QueryListChatDto) (chat_dto.ListChatDto, error) {

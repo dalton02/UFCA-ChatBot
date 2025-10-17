@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"licor_model/core/server/shared"
-	"licor_model/core/util/interceptor"
 	"licor_model/docs"
 	"os"
 
@@ -41,8 +40,7 @@ func MainServer() {
 }
 
 func StartEngine() {
-	interceptor.InitValidator()
-
+	RegisterValidations()
 	err := godotenv.Load()
 	if err != nil {
 		panic(err.Error())

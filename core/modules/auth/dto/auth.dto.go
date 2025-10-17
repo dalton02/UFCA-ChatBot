@@ -10,7 +10,7 @@ type LoginRequestDto struct {
 type RegisterRequestDto struct {
 	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,strongpassword"`
 }
 
 type AuthResponseDto struct {
@@ -26,6 +26,6 @@ type UserDto struct {
 }
 
 type JWTClaimsDto struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
+	ID    string `json:"id"`
+	Email string `json:"email"`
 }

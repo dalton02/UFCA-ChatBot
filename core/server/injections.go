@@ -33,7 +33,8 @@ func InitInjections() {
 	routes.Groups.PublicGroup = publicGroup
 	routes.Groups.JwtGroup = protectedGroup
 
-	chatControl.Routes(routes.Groups.PublicGroup)
-	authControl.Routes(routes.Groups.JwtGroup)
+	chatControl.Routes(routes.Groups.JwtGroup)
+	authControl.Routes(routes.Groups.PublicGroup)
+
 	scrapperService.Init()
 }

@@ -22,7 +22,7 @@ func NewChatRepository(exec executor.Executor) *ChatRepository {
 	}
 }
 
-func (r *ChatRepository) CreateChat(chat chat_dto.CreateChatDto) (id string, err error) {
+func (r *ChatRepository) CreateChat(chat chat_dto.CreateChatDto, userID string) (id string, err error) {
 	id = ksuid.New().String()
 	sql, args, err := r.builder.
 		Insert("chat").
@@ -30,7 +30,7 @@ func (r *ChatRepository) CreateChat(chat chat_dto.CreateChatDto) (id string, err
 		Vals(
 			goqu.Vals{
 				id,
-				chat.UserID,
+				userID,
 				chat.Title,
 			}).ToSQL()
 

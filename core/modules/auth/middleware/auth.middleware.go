@@ -29,6 +29,8 @@ func (c *AuthMiddleware) JwtGuard(ctx *gin.Context) {
 		interceptor.AppUnauthorized(ctx, "Token invalido")
 	}
 
+	fmt.Println(token)
+
 	userID := token["id"].(string)
 	_, err = c.authService.GetUserByID(userID)
 	if err != nil {

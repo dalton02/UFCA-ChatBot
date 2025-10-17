@@ -18,8 +18,7 @@ type CreateMensagemDto struct {
 }
 
 type CreateChatDto struct {
-	UserID string `json:"userId" validator:"required"`
-	Title  string `json:"title" validator:"required"`
+	Title string `json:"title" validator:"required"`
 }
 
 type ChatDto struct {

@@ -26,7 +26,7 @@ func (r *AuthRepository) CreateUser(user auth_dto.RegisterRequestDto, hashedPass
 
 	query, args, err := r.builder.
 		Insert("user").
-		Cols("id", "name", "login", "password").
+		Cols("id", "name", "email", "password").
 		Vals(goqu.Vals{id, user.Name, user.Email, hashedPassword}).
 		ToSQL()
 
@@ -45,8 +45,8 @@ func (r *AuthRepository) GetUserByEmail(email string) (auth_dto.UserDto, string,
 
 	query, args, err := r.builder.
 		From("user").
-		Select("id", "name", "login", "password").
-		Where(goqu.Ex{"login": email}).
+		Select("id", "name", "email", "password", "created_at", "updated_at").
+		Where(goqu.Ex{"email": email}).
 		ToSQL()
 
 	if err != nil {
@@ -64,7 +64,7 @@ func (r *AuthRepository) GetUserByID(id string) (auth_dto.UserDto, error) {
 	var user auth_dto.UserDto
 
 	sql, args, err := r.builder.
-		From("users").
+		From("user").
 		Select("id", "name", "email", "created_at", "updated_at").
 		Where(goqu.Ex{"id": id}).
 		ToSQL()
@@ -85,7 +85,7 @@ func (r *AuthRepository) EmailExists(email string) (bool, error) {
 	sql, args, err := r.builder.
 		From("user").
 		Select(goqu.COUNT("*")).
-		Where(goqu.Ex{"login": email}).
+		Where(goqu.Ex{"email": email}).
 		ToSQL()
 
 	if err != nil {

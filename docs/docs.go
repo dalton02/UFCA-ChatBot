@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cadastrar": {
+        "/auth/login": {
             "post": {
-                "description": "Eu acho que cadastra um usuário",
+                "description": "Autentica um usuário com email e senha",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,13 +25,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Autenticação"
+                    "Auth"
                 ],
-                "summary": "Cadastra um usuário",
+                "summary": "Login",
                 "parameters": [
                     {
-                        "description": "User credentials",
-                        "name": "credentials",
+                        "description": "Credenciais de login",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -39,7 +39,72 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "Retorna um token JWT",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/util_dto.AppResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_dto.AuthResponseDto"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Autentica um usuário com email e senha",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Cadastro de usuário",
+                "parameters": [
+                    {
+                        "description": "Credenciais de login",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_dto.RegisterRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retorna um token JWT",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/util_dto.AppResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth_dto.AuthResponseDto"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/chats/list-chats": {
@@ -262,43 +327,70 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/login": {
-            "post": {
-                "description": "Recebe login e senha para autenticar",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Autenticação"
-                ],
-                "summary": "Autentica um usuário",
-                "parameters": [
-                    {
-                        "description": "User credentials",
-                        "name": "credentials",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth_dto.LoginRequestDto"
-                        }
-                    }
-                ],
-                "responses": {}
-            }
         }
     },
     "definitions": {
-        "auth_dto.LoginRequestDto": {
+        "auth_dto.AuthResponseDto": {
             "type": "object",
             "properties": {
-                "login": {
+                "token": {
                     "type": "string"
                 },
-                "senha": {
+                "user": {
+                    "$ref": "#/definitions/auth_dto.UserDto"
+                }
+            }
+        },
+        "auth_dto.LoginRequestDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_dto.RegisterRequestDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_dto.UserDto": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -327,9 +419,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "title": {
-                    "type": "string"
-                },
-                "userId": {
                     "type": "string"
                 }
             }

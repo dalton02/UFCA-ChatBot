@@ -1,6 +1,7 @@
 package interceptor
 
 import (
+	app "licor_model/core/util/errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -87,6 +88,7 @@ func AppConflict(ctx *gin.Context, message string) {
 
 // AppInternalServerError retorna uma resposta de erro interno (500 Internal Server Error)
 func AppInternalServerError(ctx *gin.Context, message string) {
+
 	ctx.AbortWithStatusJSON(http.StatusInternalServerError, Response[any]{
 		Message:    message,
 		Data:       nil,
@@ -101,4 +103,24 @@ func AppCustomResponse(ctx *gin.Context, statusCode int, message string, data an
 		Data:       data,
 		StatusCode: statusCode,
 	})
+}
+func AppError(ctx *gin.Context, err error) {
+
+	errApp, valid := err.(app.AppError)
+
+	if valid {
+		ctx.AbortWithStatusJSON(errApp.StatusCode, Response[any]{
+			Message:    errApp.Message,
+			Data:       nil,
+			StatusCode: errApp.StatusCode,
+		})
+
+		return
+	} //Motivação: Caso eu retorne um erro não formatado, certeza que é burrice do codigo mesmo, e não da regra de negocio
+	ctx.AbortWithStatusJSON(500, Response[any]{
+		Message:    err.Error(),
+		Data:       nil,
+		StatusCode: 500,
+	})
+
 }

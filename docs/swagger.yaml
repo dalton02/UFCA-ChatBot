@@ -1,10 +1,46 @@
 basePath: /
 definitions:
+  auth_dto.AuthResponseDto:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/auth_dto.UserDto'
+    type: object
   auth_dto.LoginRequestDto:
     properties:
-      login:
+      email:
         type: string
-      senha:
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth_dto.RegisterRequestDto:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  auth_dto.UserDto:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
         type: string
     type: object
   chat_dto.ChatDto:
@@ -23,8 +59,6 @@ definitions:
   chat_dto.CreateChatDto:
     properties:
       title:
-        type: string
-      userId:
         type: string
     type: object
   chat_dto.CreateMensagemDto:
@@ -64,24 +98,60 @@ info:
   title: Golang CHATBOT
   version: '@0.0.1'
 paths:
-  /cadastrar:
+  /auth/login:
     post:
       consumes:
       - application/json
-      description: Eu acho que cadastra um usuário
+      description: Autentica um usuário com email e senha
       parameters:
-      - description: User credentials
+      - description: Credenciais de login
         in: body
-        name: credentials
+        name: body
         required: true
         schema:
           $ref: '#/definitions/auth_dto.LoginRequestDto'
       produces:
       - application/json
-      responses: {}
-      summary: Cadastra um usuário
+      responses:
+        "200":
+          description: Retorna um token JWT
+          schema:
+            allOf:
+            - $ref: '#/definitions/util_dto.AppResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_dto.AuthResponseDto'
+              type: object
+      summary: Login
       tags:
-      - Autenticação
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um usuário com email e senha
+      parameters:
+      - description: Credenciais de login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth_dto.RegisterRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Retorna um token JWT
+          schema:
+            allOf:
+            - $ref: '#/definitions/util_dto.AppResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth_dto.AuthResponseDto'
+              type: object
+      summary: Cadastro de usuário
+      tags:
+      - Auth
   /chats/{chatID}/:
     get:
       description: Retorna os detalhes de um chat específico
@@ -216,24 +286,6 @@ paths:
       summary: Criar novo chat
       tags:
       - Chats
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Recebe login e senha para autenticar
-      parameters:
-      - description: User credentials
-        in: body
-        name: credentials
-        required: true
-        schema:
-          $ref: '#/definitions/auth_dto.LoginRequestDto'
-      produces:
-      - application/json
-      responses: {}
-      summary: Autentica um usuário
-      tags:
-      - Autenticação
 securityDefinitions:
   Bearer Auth:
     in: header
