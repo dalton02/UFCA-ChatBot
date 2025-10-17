@@ -2,15 +2,16 @@ package scrapper_service
 
 import (
 	"fmt"
-	ollama_service "licor_model/core/modules/ollama/service"
 	"strconv"
 	"strings"
 
 	"github.com/gocolly/colly"
 )
 
+const LIMIT_VISITS = 5
+
 func (s *ScrapperService) InfoCadeirasCurso() {
-	alreadyVisited := false //impedir meu pczin de ser bloqueado
+	visitsMade := 0 //impedir meu pczin de ser bloqueado
 
 	s.collectorMain.OnHTML(".wikitable", func(table *colly.HTMLElement) {
 		tabelaCadeiras := false
@@ -32,10 +33,10 @@ func (s *ScrapperService) InfoCadeirasCurso() {
 					linkFormatado := link.DOM.AttrOr("href", "")
 					if len(linkFormatado) > 0 {
 						fmt.Println(linkFormatado)
-						if !alreadyVisited {
+						if visitsMade < LIMIT_VISITS {
 							s.collectorMateria.Visit(`https://pt.wikiversity.org` + linkFormatado)
 						}
-						alreadyVisited = true
+						visitsMade += 1
 					}
 				})
 			})
@@ -49,20 +50,15 @@ func (s *ScrapperService) InfoGeralCurso() {
 			if i > 1 {
 				return
 			}
-			embedding, err := ollama_service.GerarEmbedding(h.Text)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
 			var builder strings.Builder
 			builder.WriteString("INTRODUÇÃO CURSO CC")
 			builder.WriteString("-PARTE-")
 			builder.WriteString(strconv.Itoa(i))
 
-			err = s.docsService.UpsertDocument(builder.String(), h.Text, e.Request.URL.String(), embedding)
+			err := s.docsService.UpsertDocument(builder.String(), h.Text, e.Request.URL.String())
 			if err != nil {
 				fmt.Println(err.Error())
-				return
+
 			}
 		})
 

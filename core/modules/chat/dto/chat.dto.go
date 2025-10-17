@@ -6,7 +6,7 @@ import (
 )
 
 type MessageDto struct {
-	ID        int       `json:"id"`
+	ID        string    `json:"id"`
 	ChatID    string    `json:"chatId"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"createdAt"`

@@ -31,9 +31,16 @@ func (s *DocumentService) GetDocumentsBySimiliarity(content string) (docs []docu
 	return s.repo.GetDocumentsBySimiliarity(vetorFormatted)
 }
 
-func (s *DocumentService) UpsertDocument(context string, content string, link string, vetor [][]float32) error {
-	vetorSQL := util.BuilderQueryVetor(vetor)
+func (s *DocumentService) UpsertDocument(context string, content string, link string) error {
 
+	content = context + ": " + content
+	vetor, err := ollama_service.GerarEmbedding(content)
+
+	if err != nil {
+		return err
+	}
+
+	vetorSQL := util.BuilderQueryVetor(vetor)
 	document, err := s.GetDocumentByContext(context)
 
 	if err != nil {

@@ -111,7 +111,6 @@ func (r *ChatRepository) CreateMessage(mensagem string, chatID string, assistant
 		Vals(goqu.Vals{id, chatID, mensagem, assistant}).
 		ToSQL()
 
-	fmt.Println(sql)
 	_, err = r.executor.Exec(sql, args...)
 	fmt.Println(err)
 	return id, err

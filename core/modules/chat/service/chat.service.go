@@ -1,6 +1,7 @@
 package chat_service
 
 import (
+	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_repository "licor_model/core/modules/chat/repository"
 	document_service "licor_model/core/modules/document/service"
@@ -63,6 +64,7 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 	stringBuilder.WriteString("\n------ FIM DOS DADOS-------")
 	stringBuilder.WriteString("\nPergunta do usuário: ")
 	stringBuilder.WriteString(message.Content)
+	fmt.Println(stringBuilder.String())
 	responseIA, err := ollama_service.SendRequest(ollama_dto.RequestChatAI{
 		Model: os.Getenv("OLLAMA_MODEL"),
 		Messages: []ollama_dto.MessageChatAI{
@@ -77,10 +79,10 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 	}
 
 	//Salvando mensagem da IA
-	_, err = s.repo.CreateMessage(responseIA.Message.Content, chatID, true)
+	id, err := s.repo.CreateMessage(responseIA.Message.Content, chatID, true)
 
 	return chat_dto.MessageDto{
-		ID:        999,
+		ID:        id,
 		ChatID:    chatID,
 		Content:   responseIA.Message.Content,
 		CreatedAt: time.Now(),
