@@ -4,6 +4,7 @@ import (
 	"errors"
 	auth_dto "licor_model/core/modules/auth/dto"
 	auth_repository "licor_model/core/modules/auth/repository"
+	"licor_model/core/util/executor"
 	guard_util "licor_model/core/util/jwt"
 
 	"golang.org/x/crypto/bcrypt"
@@ -13,8 +14,13 @@ type AuthService struct {
 	repo *auth_repository.AuthRepository
 }
 
-func NewAuthService(repo *auth_repository.AuthRepository) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService() *AuthService {
+	return &AuthService{repo: auth_repository.NewAuthRepository(executor.NewDBExecutor(nil))}
+}
+
+func (s *AuthService) GetUserByID(id string) (auth_dto.UserDto, error) {
+	user, err := s.repo.GetUserByID(id)
+	return user, err
 }
 
 func (s *AuthService) Register(registerDto auth_dto.RegisterRequestDto) (auth_dto.AuthResponseDto, error) {

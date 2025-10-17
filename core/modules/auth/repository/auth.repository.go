@@ -24,7 +24,7 @@ func NewAuthRepository(exec executor.Executor) *AuthRepository {
 func (r *AuthRepository) CreateUser(user auth_dto.RegisterRequestDto, hashedPassword string) (string, error) {
 	id := ksuid.New().String()
 
-	sql, args, err := r.builder.
+	query, args, err := r.builder.
 		Insert("user").
 		Cols("id", "name", "login", "password").
 		Vals(goqu.Vals{id, user.Name, user.Email, hashedPassword}).
@@ -34,7 +34,8 @@ func (r *AuthRepository) CreateUser(user auth_dto.RegisterRequestDto, hashedPass
 		return "", err
 	}
 
-	_, err = r.executor.Exec(sql, args...)
+	_, err = r.executor.Exec(query, args...)
+
 	return id, err
 }
 
@@ -42,7 +43,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (auth_dto.UserDto, string,
 	var user auth_dto.UserDto
 	var password string
 
-	sql, args, err := r.builder.
+	query, args, err := r.builder.
 		From("user").
 		Select("id", "name", "login", "password").
 		Where(goqu.Ex{"login": email}).
@@ -52,10 +53,11 @@ func (r *AuthRepository) GetUserByEmail(email string) (auth_dto.UserDto, string,
 		return user, "", err
 	}
 
-	row := r.executor.QueryRow(sql, args...)
+	row := r.executor.QueryRow(query, args...)
 	err = row.Scan(&user.ID, &user.Name, &user.Email, &password, &user.CreatedAt, &user.UpdatedAt)
 
 	return user, password, err
+
 }
 
 func (r *AuthRepository) GetUserByID(id string) (auth_dto.UserDto, error) {
