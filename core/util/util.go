@@ -3,12 +3,15 @@ package util
 import (
 	"fmt"
 	"io"
+	"licor_model/core/util/executor"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/doug-martin/goqu/v9"
 )
 
 func NormalizeString(input string) (string, error) {
@@ -141,4 +144,34 @@ func BuilderQueryVetor(vetor [][]float32) string {
 		}
 	}
 	return builderVetores.String()
+}
+
+func CountSQL(executor executor.Executor, expression string, builder *goqu.SelectDataset) (total int, err error) {
+	countQuery := builder.
+		ClearSelect().
+		ClearOrder().
+		ClearOffset().
+		ClearLimit()
+
+	countQuery = countQuery.Select(goqu.COUNT(goqu.L(expression)))
+
+	sql, args, err := countQuery.ToSQL()
+
+	if err != nil {
+		return 0, fmt.Errorf("erro ao gerar SQL: %w", err)
+	}
+
+	rows, err := executor.Query(sql, args...)
+
+	if err != nil {
+		return 0, fmt.Errorf("erro ao executar COUNT: %w", err)
+	}
+
+	for rows.Next() {
+		var tmp int
+		rows.Scan(&tmp)
+		total += tmp
+	}
+
+	return total, nil
 }

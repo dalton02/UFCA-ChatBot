@@ -84,6 +84,37 @@ definitions:
       total:
         type: integer
     type: object
+  chat_dto.ListMessageDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/chat_dto.MessageDto'
+        type: array
+      limit:
+        example: 10
+        maximum: 100
+        minimum: 1
+        type: integer
+      page:
+        example: 1
+        minimum: 1
+        type: integer
+      total:
+        type: integer
+    type: object
+  chat_dto.MessageDto:
+    properties:
+      assistant:
+        type: boolean
+      chatId:
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+    type: object
   util_dto.AppResponse:
     properties:
       data: {}
@@ -152,32 +183,42 @@ paths:
       summary: Cadastro de usuário
       tags:
       - Auth
-  /chats/{chatID}/:
+  /chats/{chatID}/list-messages:
     get:
-      description: Retorna os detalhes de um chat específico
+      consumes:
+      - application/json
       parameters:
-      - description: ID do chat
-        in: path
-        name: chatID
-        required: true
-        type: string
+      - example: 10
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - example: 1
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - in: query
+        name: total
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Chat encontrado
+          description: Lista de chats
           schema:
             allOf:
             - $ref: '#/definitions/util_dto.AppResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/chat_dto.ChatDto'
+                  $ref: '#/definitions/chat_dto.ListMessageDto'
               type: object
         "404":
           description: Nenhum chat encontrado
           schema:
             $ref: '#/definitions/util_dto.AppResponse'
-      summary: Buscar chat por ID
+      summary: Listar mensagens
       tags:
       - Chats
   /chats/{chatID}/new-message:

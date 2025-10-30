@@ -222,28 +222,43 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/{chatID}/": {
+        "/chats/{chatID}/list-messages": {
             "get": {
-                "description": "Retorna os detalhes de um chat específico",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Chats"
                 ],
-                "summary": "Buscar chat por ID",
+                "summary": "Listar mensagens",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "ID do chat",
-                        "name": "chatID",
-                        "in": "path",
-                        "required": true
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 10,
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1,
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "total",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Chat encontrado",
+                        "description": "Lista de chats",
                         "schema": {
                             "allOf": [
                                 {
@@ -253,7 +268,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/chat_dto.ChatDto"
+                                            "$ref": "#/definitions/chat_dto.ListMessageDto"
                                         }
                                     }
                                 }
@@ -453,6 +468,51 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "chat_dto.ListMessageDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chat_dto.MessageDto"
+                    }
+                },
+                "limit": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1,
+                    "example": 10
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "chat_dto.MessageDto": {
+            "type": "object",
+            "properties": {
+                "assistant": {
+                    "type": "boolean"
+                },
+                "chatId": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
                 }
             }
         },

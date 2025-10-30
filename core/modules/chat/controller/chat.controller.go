@@ -1,6 +1,7 @@
 package chat_controller
 
 import (
+	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_service "licor_model/core/modules/chat/service"
 	util_dto "licor_model/core/util/dto"
@@ -89,25 +90,6 @@ func (c *ChatController) SendMessage(ctx *gin.Context) {
 	interceptor.AppSuccess(ctx, "Resposta da IA", response)
 }
 
-// GetChat godoc
-// @Summary Buscar chat por ID
-// @Description Retorna os detalhes de um chat específico
-// @Tags Chats
-// @Produce json
-// @Param chatID path string true "ID do chat"
-// @Success 200 {object} util_dto.AppResponse{data=chat_dto.ChatDto} "Chat encontrado"
-// @Failure 404 {object} util_dto.AppResponse "Nenhum chat encontrado"
-// @Router /chats/{chatID}/ [get]
-func (c *ChatController) GetChat(ctx *gin.Context) {
-	chatID, _ := ctx.Params.Get("chatID")
-	result, err := c.chatService.GetChatByID(chatID)
-	if err != nil {
-		interceptor.AppNotFound(ctx, err.Error())
-		return
-	}
-	interceptor.AppSuccess(ctx, "Chat encontrado", result)
-}
-
 // ListChats godoc
 // @Summary Listar chats
 // @Description Lista chats aplicando filtros opcionais
@@ -126,13 +108,44 @@ func (c *ChatController) ListChats(ctx *gin.Context) {
 		return
 	}
 
-	result, err := c.chatService.ListChat(filters)
+	userID := ctx.MustGet("userID").(string)
+
+	result, err := c.chatService.ListChat(filters, userID)
 	if err != nil {
-		interceptor.AppNotFound(ctx, err.Error())
+		interceptor.AppError(ctx, err)
 		return
 	}
 	interceptor.AppSuccess(ctx, "Chats encontrados", result)
 }
+
+// ListChats godoc
+// @Summary Listar mensagens
+// @Tags Chats
+// @Accept json
+// @Produce json
+// @Param query query chat_dto.ListMessageDto true "Filtros"
+// @Success 200 {object} util_dto.AppResponse{data=chat_dto.ListMessageDto} "Lista de chats"
+// @Failure 404 {object} util_dto.AppResponse "Nenhum chat encontrado"
+// @Router /chats/{chatID}/list-messages [get]
+func (c *ChatController) ListMessages(ctx *gin.Context) {
+	var filters chat_dto.QueryListMessageDto
+
+	if err := interceptor.ValidateAndExtractQuery(ctx, &filters); err != nil {
+		interceptor.AppBadRequest(ctx, err.Error())
+		return
+	}
+
+	chatID, _ := ctx.Params.Get("chatID")
+
+	result, err := c.chatService.ListMessages(filters, chatID)
+	fmt.Println(result, err)
+	if err != nil {
+		interceptor.AppError(ctx, err)
+		return
+	}
+	interceptor.AppSuccess(ctx, "Chats encontrados", result)
+}
+
 func (c *ChatController) Routes(g *gin.RouterGroup) {
 
 	g.POST("/chats/new-chat", c.CreateChat)
@@ -140,7 +153,7 @@ func (c *ChatController) Routes(g *gin.RouterGroup) {
 
 	insideChat := g.Group("/chats/:chatID")
 	{
-		insideChat.GET("/", c.GetChat)
+		insideChat.GET("/list-messages", c.ListMessages)
 		insideChat.POST("/new-message", c.SendMessage)
 	}
 }

@@ -31,6 +31,14 @@ type ChatDto struct {
 type QueryListChatDto struct {
 	util_dto.QueryPaginationDto
 }
+
+type QueryListMessageDto struct {
+	util_dto.QueryPaginationDto
+}
 type ListChatDto struct {
 	util_dto.ResponsePaginatedDto[[]ChatDto]
+}
+
+type ListMessageDto struct {
+	util_dto.ResponsePaginatedDto[[]MessageDto]
 }

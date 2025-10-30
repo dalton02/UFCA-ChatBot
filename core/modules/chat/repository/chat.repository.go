@@ -4,6 +4,7 @@ import (
 	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	"licor_model/core/server/shared"
+	"licor_model/core/util"
 	"licor_model/core/util/executor"
 
 	"github.com/doug-martin/goqu/v9"
@@ -43,11 +44,21 @@ func (r *ChatRepository) CreateChat(chat chat_dto.CreateChatDto, userID string) 
 }
 
 // Listar chats (filtros ainda não implementados)
-func (r *ChatRepository) ListChat(filtros chat_dto.QueryListChatDto) (response chat_dto.ListChatDto, err error) {
+func (r *ChatRepository) ListChat(filters chat_dto.QueryListChatDto, userID string) (response chat_dto.ListChatDto, err error) {
 	// Exemplo simples sem aplicar filtros ainda
-	sql, args, _ := r.builder.From("chat").
+	response.Limit = filters.Limit
+	response.Page = filters.Page
+
+	build := r.builder.From("chat").
 		Select("id", "user_id", "title", "created_at", "updated_at").
-		ToSQL()
+		Where(goqu.Ex{
+			"user_id": userID,
+		}).
+		Limit(uint(filters.Limit)).
+		Offset(uint(filters.Limit * (filters.Page - 1)))
+
+	response.Total, _ = util.CountSQL(r.executor, "DISTINCT id", build)
+	sql, args, _ := build.ToSQL()
 
 	rows, queryErr := r.executor.Query(sql, args...)
 	if queryErr != nil {
@@ -57,6 +68,7 @@ func (r *ChatRepository) ListChat(filtros chat_dto.QueryListChatDto) (response c
 
 	var chats []chat_dto.ChatDto = []chat_dto.ChatDto{}
 	for rows.Next() {
+		fmt.Println("aaa")
 		var chat chat_dto.ChatDto
 		if scanErr := rows.Scan(&chat.ID, &chat.UserID, &chat.Title, &chat.CreatedAt, &chat.UpdatedAt); scanErr != nil {
 			return response, scanErr
@@ -65,8 +77,6 @@ func (r *ChatRepository) ListChat(filtros chat_dto.QueryListChatDto) (response c
 	}
 
 	response.Data = chats
-	response.Page = filtros.Page
-	response.Limit = filtros.Limit
 
 	return response, nil
 }
@@ -97,10 +107,47 @@ func (r *ChatRepository) GetChatByID(id string) (chat_dto.ChatDto, error) {
 	return chat, nil
 }
 
-// Buscar mensagens de um chat (placeholder)
-func (r *ChatRepository) GetMessages(chatID int) ([]string, error) {
-	// Ainda não implementado
-	return nil, nil
+// Listar chats (filtros ainda não implementados)
+func (r *ChatRepository) ListMessages(filters chat_dto.QueryListMessageDto, chatID string) (response chat_dto.ListMessageDto, err error) {
+	// Exemplo simples sem aplicar filtros ainda
+	response.Limit = filters.Limit
+	response.Page = filters.Page
+
+	build := r.builder.From("message").
+		Select("id", "content", "created_at", "assistant").
+		Where(goqu.Ex{
+			"chat_id": chatID,
+		}).
+		Limit(uint(filters.Limit)).
+		Offset(uint(filters.Limit * (filters.Page - 1)))
+
+	response.Total, _ = util.CountSQL(r.executor, "DISTINCT id", build)
+	sql, args, _ := build.ToSQL()
+
+	rows, queryErr := r.executor.Query(sql, args...)
+
+	if queryErr != nil {
+		return response, queryErr
+	}
+
+	defer rows.Close()
+
+	var messages []chat_dto.MessageDto = []chat_dto.MessageDto{}
+
+	for rows.Next() {
+		var message chat_dto.MessageDto
+
+		message.ChatID = chatID
+		if scanErr := rows.Scan(&message.ID, &message.Content, &message.CreatedAt, &message.Assistant); scanErr != nil {
+			return response, scanErr
+		}
+
+		messages = append(messages, message)
+	}
+
+	response.Data = messages
+
+	return response, nil
 }
 
 // Salvar mensagem

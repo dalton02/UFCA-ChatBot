@@ -7,7 +7,6 @@ import (
 	chat_controller "licor_model/core/modules/chat/controller"
 	chat_service "licor_model/core/modules/chat/service"
 	document_service "licor_model/core/modules/document/service"
-	scrapper_service "licor_model/core/modules/scrapper/service"
 )
 
 func InitInjections() {
@@ -35,6 +34,6 @@ func InitInjections() {
 	chatControl.Routes(routes.Groups.JwtGroup)
 	authControl.Routes(routes.Groups.PublicGroup)
 
-	scrapperService := scrapper_service.NewScrapperService(docService)
-	scrapperService.Init()
+	// scrapperService := scrapper_service.NewScrapperService(docService)
+	// scrapperService.Init()
 }
