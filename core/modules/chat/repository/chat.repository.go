@@ -68,7 +68,6 @@ func (r *ChatRepository) ListChat(filters chat_dto.QueryListChatDto, userID stri
 
 	var chats []chat_dto.ChatDto = []chat_dto.ChatDto{}
 	for rows.Next() {
-		fmt.Println("aaa")
 		var chat chat_dto.ChatDto
 		if scanErr := rows.Scan(&chat.ID, &chat.UserID, &chat.Title, &chat.CreatedAt, &chat.UpdatedAt); scanErr != nil {
 			return response, scanErr
@@ -159,6 +158,5 @@ func (r *ChatRepository) CreateMessage(mensagem string, chatID string, assistant
 		ToSQL()
 
 	_, err = r.executor.Exec(sql, args...)
-	fmt.Println(err)
 	return id, err
 }

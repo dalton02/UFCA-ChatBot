@@ -17,6 +17,11 @@ type CreateMensagemDto struct {
 	Content string `json:"content" validator:"required"`
 }
 
+type ResponseNewMessage struct {
+	IDIa      string `json:"idIa"`
+	IDHuman   string `json:"idHuman"`
+	IAContent string `json:"iaContent"`
+}
 type CreateChatDto struct {
 	Title string `json:"title" validator:"required"`
 }

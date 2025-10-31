@@ -2,7 +2,6 @@ package auth_service
 
 import (
 	"errors"
-	"fmt"
 	auth_dto "licor_model/core/modules/auth/dto"
 	auth_repository "licor_model/core/modules/auth/repository"
 	"licor_model/core/util/executor"
@@ -71,13 +70,11 @@ func (s *AuthService) Login(loginDto auth_dto.LoginRequestDto) (auth_dto.AuthRes
 
 	user, hashedPassword, err := s.repo.GetUserByEmail(loginDto.Email)
 	if err != nil {
-		fmt.Println("user", err.Error())
 		return response, errors.New("credenciais inválidas")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginDto.Password))
 	if err != nil {
-		fmt.Println("aqui")
 		return response, errors.New("credenciais inválidas")
 	}
 

@@ -47,7 +47,7 @@ func StartEngine() {
 	}
 
 	routes = &RoutesH{
-		Engine: gin.Default(),
+		Engine: gin.New(),
 	}
 
 	routes.Engine.Use(shared.Cors)
@@ -59,7 +59,6 @@ func StartEngine() {
 		c.Next()
 	})
 
-	routes.Engine.Use(gin.Logger())
 	routes.Engine.Use(gin.Recovery())
 
 }
