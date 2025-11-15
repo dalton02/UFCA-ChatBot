@@ -10,6 +10,7 @@ type MessageDto struct {
 	ChatID    string    `json:"chatId"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"createdAt"`
+	Links     []string  `json:"links"`
 	Assistant bool      `json:"assistant"`
 }
 
@@ -18,9 +19,10 @@ type CreateMensagemDto struct {
 }
 
 type ResponseNewMessage struct {
-	IDIa      string `json:"idIa"`
-	IDHuman   string `json:"idHuman"`
-	IAContent string `json:"iaContent"`
+	IDIa      string   `json:"idIa"`
+	IDHuman   string   `json:"idHuman"`
+	IAContent string   `json:"iaContent"`
+	Links     []string `json:"links"`
 }
 type CreateChatDto struct {
 	Title string `json:"title" validator:"required"`

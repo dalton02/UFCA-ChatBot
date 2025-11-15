@@ -118,6 +118,20 @@ func (c *ChatController) ListChats(ctx *gin.Context) {
 	interceptor.AppSuccess(ctx, "Chats encontrados", result)
 }
 
+func (c *ChatController) DeleteChat(ctx *gin.Context) {
+
+	chatID := ctx.Param("chatID")
+
+	userID := ctx.MustGet("userID").(string)
+
+	err := c.chatService.DeleteChat(chatID, userID)
+	if err != nil {
+		interceptor.AppError(ctx, err)
+		return
+	}
+	interceptor.AppSuccess(ctx, "Chats Deletado", nil)
+}
+
 // ListChats godoc
 // @Summary Listar mensagens
 // @Tags Chats
@@ -153,6 +167,7 @@ func (c *ChatController) Routes(g *gin.RouterGroup) {
 
 	insideChat := g.Group("/chats/:chatID")
 	{
+		insideChat.DELETE("/", c.DeleteChat)
 		insideChat.GET("/list-messages", c.ListMessages)
 		insideChat.POST("/new-message", c.SendMessage)
 	}

@@ -2,6 +2,7 @@ package chat_service
 
 import (
 	"database/sql"
+	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_repository "licor_model/core/modules/chat/repository"
 	ollama_dto "licor_model/core/modules/ollama/dto"
@@ -23,11 +24,18 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 		return response, err
 	}
 
+	var links []string = []string{}
+	fmt.Println(documents)
+	for _, doc := range documents {
+		links = append(links, doc.Link)
+		fmt.Println(doc.Link)
+	}
+
 	transaction.RunInTx(func(tx *sql.Tx) error {
 		repoTransaction := chat_repository.NewChatRepository(executor.NewDBExecutor(tx))
 
 		//Salvando mensagem do usuário
-		idHuman, err := repoTransaction.CreateMessage(message.Content, chatID, false)
+		idHuman, err := repoTransaction.CreateMessage(message.Content, chatID, false, []string{})
 		if err != nil {
 			return err
 		}
@@ -56,7 +64,7 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 			return err
 		}
 
-		idIA, err := s.repo.CreateMessage(responseIA.Message.Content, chatID, true)
+		idIA, err := s.repo.CreateMessage(responseIA.Message.Content, chatID, true, links)
 		if err != nil {
 			return err
 		}
@@ -64,6 +72,7 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 		response.IDIa = idIA
 		response.IDHuman = idHuman
 		response.IAContent = responseIA.Message.Content
+		response.Links = links
 		return nil
 
 	})

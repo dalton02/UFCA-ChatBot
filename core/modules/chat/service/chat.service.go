@@ -1,9 +1,11 @@
 package chat_service
 
 import (
+	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_repository "licor_model/core/modules/chat/repository"
 	document_service "licor_model/core/modules/document/service"
+	app "licor_model/core/util/errors"
 	"licor_model/core/util/executor"
 )
 
@@ -25,6 +27,30 @@ func (s *ChatService) CreateChat(chat chat_dto.CreateChatDto, userID string) (id
 
 func (s *ChatService) ListChat(filters chat_dto.QueryListChatDto, userID string) (chat_dto.ListChatDto, error) {
 	return s.repo.ListChat(filters, userID)
+}
+
+func (s *ChatService) DeleteChat(id string, userId string) error {
+
+	chat, err := s.GetChatByID(id)
+	if err != nil {
+		fmt.Println(err)
+		return app.NotFound("chat não encontrado")
+
+	}
+
+	if chat.UserID != userId {
+		return app.Forbidden("Nem é teu chat pra deletar amigão")
+	}
+
+	err = s.repo.DeleteAllMessagesChat(id)
+
+	if err != nil {
+		fmt.Println(err)
+		return app.NotFound("chat não encontrado")
+
+	}
+	return s.repo.DeleteChat(id)
+
 }
 
 func (s *ChatService) GetChatByID(id string) (chat_dto.ChatDto, error) {

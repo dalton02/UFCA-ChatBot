@@ -8,6 +8,7 @@ import (
 	"licor_model/core/util/executor"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/lib/pq"
 	"github.com/segmentio/ksuid"
 )
 
@@ -113,7 +114,7 @@ func (r *ChatRepository) ListMessages(filters chat_dto.QueryListMessageDto, chat
 	response.Page = filters.Page
 
 	build := r.builder.From("message").
-		Select("id", "content", "created_at", "assistant").
+		Select("id", "content", "created_at", "assistant", "links").
 		Where(goqu.Ex{
 			"chat_id": chatID,
 		}).
@@ -137,7 +138,7 @@ func (r *ChatRepository) ListMessages(filters chat_dto.QueryListMessageDto, chat
 		var message chat_dto.MessageDto
 
 		message.ChatID = chatID
-		if scanErr := rows.Scan(&message.ID, &message.Content, &message.CreatedAt, &message.Assistant); scanErr != nil {
+		if scanErr := rows.Scan(&message.ID, &message.Content, &message.CreatedAt, &message.Assistant, pq.Array(&message.Links)); scanErr != nil {
 			return response, scanErr
 		}
 
@@ -149,12 +150,28 @@ func (r *ChatRepository) ListMessages(filters chat_dto.QueryListMessageDto, chat
 	return response, nil
 }
 
+func (r *ChatRepository) DeleteAllMessagesChat(chatID string) error {
+	sql := `DELETE FROM message WHERE chat_id = $1`
+
+	_, err := r.executor.Exec(sql, chatID)
+
+	return err
+}
+
+func (r *ChatRepository) DeleteChat(id string) error {
+	sql := `DELETE FROM chat WHERE id = $1`
+
+	_, err := r.executor.Exec(sql, id)
+
+	return err
+}
+
 // Salvar mensagem
-func (r *ChatRepository) CreateMessage(mensagem string, chatID string, assistant bool) (id string, err error) {
+func (r *ChatRepository) CreateMessage(mensagem string, chatID string, assistant bool, links []string) (id string, err error) {
 	id = ksuid.New().String()
 	sql, args, _ := r.builder.Insert("message").
-		Cols("id", "chat_id", "content", "assistant").
-		Vals(goqu.Vals{id, chatID, mensagem, assistant}).
+		Cols("id", "chat_id", "content", "assistant", "links").
+		Vals(goqu.Vals{id, chatID, mensagem, assistant, pq.Array(links)}).
 		ToSQL()
 
 	_, err = r.executor.Exec(sql, args...)

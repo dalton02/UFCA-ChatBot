@@ -27,8 +27,8 @@ func (s *ScrapperService) Init() {
 	s.InfoGeralCurso()
 	s.InfoCadeirasCurso()
 	s.InfoCadeiraDetalhes()
-	s.InfoConteudos()        //
-	s.InfoPaginaDeConteudo() //
+	s.InfoConteudos() //
+	//	s.InfoPaginaDeConteudo() //
 
 	s.collectorMain.Visit("https://pt.wikiversity.org/wiki/CCT-UFCA/Ci%C3%AAncia_da_Computa%C3%A7%C3%A3o")
 }

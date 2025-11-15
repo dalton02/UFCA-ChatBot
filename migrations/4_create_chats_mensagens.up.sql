@@ -14,6 +14,7 @@ CREATE TABLE message (
     id VARCHAR(32) PRIMARY KEY NOT NULL,
     chat_id VARCHAR(32) NOT NULL,
     content TEXT NOT NULL,
+    links VARCHAR(300)[],
     created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     assistant BOOLEAN NOT NULL,
     FOREIGN KEY (chat_id) REFERENCES chat(id)
