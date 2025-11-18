@@ -81,7 +81,7 @@ func (c *ChatController) SendMessage(ctx *gin.Context) {
 
 	chatID, _ := ctx.Params.Get("chatID")
 
-	response, err := c.chatService.SaveMessage(message, chatID)
+	response, err := c.chatService.SaveMessage(ctx, message, chatID)
 
 	if err != nil {
 		interceptor.AppBadRequest(ctx, err.Error())

@@ -1,4 +1,4 @@
-package ollama_service
+package ai_service
 
 import (
 	"bytes"
@@ -32,7 +32,7 @@ func GerarEmbedding(conteudo string) ([][]float32, error) {
 	return vetor, err
 }
 
-func SendRequest(ollamaReq ollama_dto.RequestChatAI) (*ollama_dto.ResponseChatAI, error) {
+func SendRequestOllama(ollamaReq ollama_dto.RequestChatAI) (*ollama_dto.ResponseChatAI, error) {
 	url := os.Getenv("OLLAMA_URL") + "/api/chat"
 	js, err := json.Marshal(&ollamaReq)
 	if err != nil {

@@ -6,18 +6,20 @@ import (
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_repository "licor_model/core/modules/chat/repository"
 	ollama_dto "licor_model/core/modules/ollama/dto"
-	ollama_service "licor_model/core/modules/ollama/service"
+	ai_service "licor_model/core/modules/ollama/service"
 	"licor_model/core/util/executor"
 	"licor_model/core/util/transaction"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (s *ChatService) ListMessages(filters chat_dto.QueryListMessageDto, chatID string) (response chat_dto.ListMessageDto, err error) {
 	return s.repo.ListMessages(filters, chatID)
 }
 
-func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID string) (response chat_dto.ResponseNewMessage, err error) {
+func (s *ChatService) SaveMessage(ctx *gin.Context, message chat_dto.CreateMensagemDto, chatID string) (response chat_dto.ResponseNewMessage, err error) {
 
 	documents, err := s.docService.GetDocumentsBySimiliarity(message.Content)
 	if err != nil {
@@ -25,10 +27,8 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 	}
 
 	var links []string = []string{}
-	fmt.Println(documents)
 	for _, doc := range documents {
 		links = append(links, doc.Link)
-		fmt.Println(doc.Link)
 	}
 
 	transaction.RunInTx(func(tx *sql.Tx) error {
@@ -41,8 +41,7 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 		}
 
 		var stringBuilder strings.Builder
-		stringBuilder.WriteString(`Você é um assistente da universidade. Responda APENAS com base nos dados abaixo. Nunca mencione sites. Mantenha o foco em alunos e universidade.
-		DADOS:`)
+		stringBuilder.WriteString(`Você é um assistente da universidade. Responda com base nos dados abaixo e tente manter um foco maior apenas em duvidas da universidade no geral, tente sempre que possivel entrar em detalhes sobre a duvida que foi lhe mandada`)
 		for _, doc := range documents {
 			stringBuilder.WriteString("\n---\n")
 			stringBuilder.WriteString(doc.Content)
@@ -51,7 +50,8 @@ func (s *ChatService) SaveMessage(message chat_dto.CreateMensagemDto, chatID str
 		stringBuilder.WriteString(`
 		PERGUNTA: ` + message.Content + `
 		RESPOSTA:`)
-		responseIA, err := ollama_service.SendRequest(ollama_dto.RequestChatAI{
+		fmt.Println(stringBuilder.String())
+		responseIA, err := ai_service.SendRequestOpenAIStream(ctx, links, ollama_dto.RequestChatAI{
 			Model: os.Getenv("OLLAMA_MODEL"),
 			Messages: []ollama_dto.MessageChatAI{
 				{

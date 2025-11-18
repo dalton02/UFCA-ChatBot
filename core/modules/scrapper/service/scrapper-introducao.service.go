@@ -8,7 +8,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
-const LIMIT_VISITS = 5
+const LIMIT_VISITS = 500
 
 func (s *ScrapperService) InfoCadeirasCurso() {
 	visitsMade := 0 //impedir meu pczin de ser bloqueado

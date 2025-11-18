@@ -3,7 +3,7 @@ package document_service
 import (
 	document_dto "licor_model/core/modules/document/dto"
 	document_repository "licor_model/core/modules/document/repository"
-	ollama_service "licor_model/core/modules/ollama/service"
+	ai_service "licor_model/core/modules/ollama/service"
 	"licor_model/core/util"
 	"licor_model/core/util/executor"
 )
@@ -23,7 +23,7 @@ func (s *DocumentService) GetDocumentByContext(context string) (document_dto.Doc
 }
 
 func (s *DocumentService) GetDocumentsBySimiliarity(content string) (docs []document_dto.DocumentDto, err error) {
-	vetor, err := ollama_service.GerarEmbedding(content)
+	vetor, err := ai_service.GerarEmbedding(content)
 	if err != nil {
 		return docs, err
 	}
@@ -34,7 +34,7 @@ func (s *DocumentService) GetDocumentsBySimiliarity(content string) (docs []docu
 func (s *DocumentService) UpsertDocument(context string, content string, link string) error {
 
 	content = context + ": " + content
-	vetor, err := ollama_service.GerarEmbedding(content)
+	vetor, err := ai_service.GerarEmbedding(content)
 
 	if err != nil {
 		return err

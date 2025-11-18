@@ -16,6 +16,8 @@ func (s *ScrapperService) InfoCadeiraDetalhes() {
 
 		baseContext := "CADEIRA" + " - " + courseName + " - "
 
+		fmt.Println(courseName, " -  VISITADO")
+
 		doc.Find("div.mw-heading.mw-heading2").Each(func(i int, div *goquery.Selection) {
 
 			h2Objetivos := div.Find("h2#Objetivos")

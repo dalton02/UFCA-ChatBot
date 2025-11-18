@@ -35,7 +35,7 @@ func (r *DocumentRepository) GetDocumentByContext(context string) (document_dto.
 }
 
 func (r *DocumentRepository) GetDocumentsBySimiliarity(vetor string) (docs []document_dto.DocumentDto, err error) {
-	query := `SELECT context,content,link FROM document ORDER BY embedding <-> ` + vetor + ` LIMIT 5`
+	query := `SELECT context,content,link FROM document ORDER BY embedding <-> ` + vetor + ` LIMIT 8`
 	result, err := r.executor.Query(query)
 	if err != nil {
 		return docs, err
