@@ -16,7 +16,7 @@ func (s *ScrapperService) InfoCadeiraDetalhes() {
 
 		baseContext := "CADEIRA" + " - " + courseName + " - "
 
-		fmt.Println(courseName, " -  VISITADO")
+		s.memory.Materias = append(s.memory.Materias, courseName)
 
 		doc.Find("div.mw-heading.mw-heading2").Each(func(i int, div *goquery.Selection) {
 
@@ -75,8 +75,6 @@ func (s *ScrapperService) GetCourseName(dom *goquery.Selection) (courseName stri
 			// Pega a segunda <td> (índice 1)
 			td := tr.Find("td").Eq(1)
 			courseName = strings.TrimSpace(td.Text())
-
-			fmt.Println("Nome da cadeira:", courseName)
 			return false
 		}
 		return true

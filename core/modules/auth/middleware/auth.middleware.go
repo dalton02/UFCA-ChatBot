@@ -29,7 +29,11 @@ func (c *AuthMiddleware) JwtGuard(ctx *gin.Context) {
 		interceptor.AppUnauthorized(ctx, "Token invalido")
 	}
 
-	userID := token["id"].(string)
+	userID, exist := token["id"].(string)
+	if !exist {
+		interceptor.AppUnauthorized(ctx, "Token invalido")
+		return
+	}
 	_, err = c.authService.GetUserByID(userID)
 	if err != nil {
 		interceptor.AppUnauthorized(ctx, "Token valido, porém usuário não existe")

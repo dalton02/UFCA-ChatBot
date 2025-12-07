@@ -5,22 +5,31 @@ import (
 	auth_middleware "licor_model/core/modules/auth/middleware"
 	auth_service "licor_model/core/modules/auth/service"
 	chat_controller "licor_model/core/modules/chat/controller"
+	chat_middleware "licor_model/core/modules/chat/middleware"
 	chat_service "licor_model/core/modules/chat/service"
 	document_service "licor_model/core/modules/document/service"
+	redis_service "licor_model/core/modules/redis"
 )
 
 func InitInjections() {
 
 	//Services
+
+	redisService, err := redis_service.NewRedisService()
+	if err != nil {
+		panic(err)
+	}
+
 	docService := document_service.NewDocumentService()
 	chatService := chat_service.NewChatService(docService)
 	authService := auth_service.NewAuthService()
 
 	//Middlewares
 	authMid := auth_middleware.NewAuthMiddleware(authService)
+	chatMid := chat_middleware.NewChatService(redisService)
 
 	//Controllers
-	chatControl := chat_controller.NewController(chatService)
+	chatControl := chat_controller.NewController(chatService, chatMid)
 	authControl := auth_controller.NewAuthController(authService)
 
 	//Agrupamento de rotas
@@ -34,6 +43,4 @@ func InitInjections() {
 	chatControl.Routes(routes.Groups.JwtGroup)
 	authControl.Routes(routes.Groups.PublicGroup)
 
-	// scrapperService := scrapper_service.NewScrapperService(docService)
-	// scrapperService.Init()
 }

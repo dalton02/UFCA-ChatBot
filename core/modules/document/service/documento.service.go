@@ -6,6 +6,7 @@ import (
 	ai_service "licor_model/core/modules/ollama/service"
 	"licor_model/core/util"
 	"licor_model/core/util/executor"
+	"licor_model/core/util/timer"
 )
 
 type DocumentService struct {
@@ -23,12 +24,26 @@ func (s *DocumentService) GetDocumentByContext(context string) (document_dto.Doc
 }
 
 func (s *DocumentService) GetDocumentsBySimiliarity(content string) (docs []document_dto.DocumentDto, err error) {
+
+	timing := timer.NewTimer()
+	timing.Start("generating embedding")
+
 	vetor, err := ai_service.GerarEmbedding(content)
 	if err != nil {
 		return docs, err
 	}
+
+	timing.End("generating embedding")
+
 	vetorFormatted := util.BuilderQueryVetor(vetor)
-	return s.repo.GetDocumentsBySimiliarity(vetorFormatted)
+
+	timing.Start("getting documents")
+
+	docs, err = s.repo.GetDocumentsBySimiliarity(vetorFormatted)
+
+	timing.End("getting documents")
+
+	return docs, err
 }
 
 func (s *DocumentService) UpsertDocument(context string, content string, link string) error {

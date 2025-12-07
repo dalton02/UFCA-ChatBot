@@ -32,16 +32,18 @@ func (s *ScrapperService) InfoCadeirasCurso() {
 				column.ForEach("a", func(i int, link *colly.HTMLElement) {
 					linkFormatado := link.DOM.AttrOr("href", "")
 					if len(linkFormatado) > 0 {
-						fmt.Println(linkFormatado)
 						if visitsMade < LIMIT_VISITS {
 							s.collectorMateria.Visit(`https://pt.wikiversity.org` + linkFormatado)
 						}
 						visitsMade += 1
 					}
 				})
+
 			})
+
 		})
 	})
+
 }
 
 func (s *ScrapperService) InfoGeralCurso() {

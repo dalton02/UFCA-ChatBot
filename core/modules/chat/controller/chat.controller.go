@@ -3,6 +3,7 @@ package chat_controller
 import (
 	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
+	chat_middleware "licor_model/core/modules/chat/middleware"
 	chat_service "licor_model/core/modules/chat/service"
 	util_dto "licor_model/core/util/dto"
 	"licor_model/core/util/interceptor"
@@ -12,12 +13,14 @@ import (
 )
 
 type ChatController struct {
-	chatService *chat_service.ChatService
+	chatService    *chat_service.ChatService
+	chatMiddleware *chat_middleware.ChatMiddleware
 }
 
-func NewController(chatService *chat_service.ChatService) *ChatController {
+func NewController(chatService *chat_service.ChatService, chatMiddleware *chat_middleware.ChatMiddleware) *ChatController {
 	return &ChatController{
-		chatService: chatService,
+		chatService:    chatService,
+		chatMiddleware: chatMiddleware,
 	}
 }
 
@@ -169,6 +172,6 @@ func (c *ChatController) Routes(g *gin.RouterGroup) {
 	{
 		insideChat.DELETE("/", c.DeleteChat)
 		insideChat.GET("/list-messages", c.ListMessages)
-		insideChat.POST("/new-message", c.SendMessage)
+		insideChat.POST("/new-message", c.chatMiddleware.ValidateAIDailyUse, c.SendMessage)
 	}
 }
