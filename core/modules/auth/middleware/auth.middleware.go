@@ -21,6 +21,7 @@ func NewAuthMiddleware(authService *auth_service.AuthService) *AuthMiddleware {
 
 func (c *AuthMiddleware) JwtGuard(ctx *gin.Context) {
 
+	fmt.Println("WHYYYYY")
 	bearerToken := ctx.Request.Header.Get("Authorization")
 
 	token, err := guard_util.GetJwtInfo(bearerToken)
