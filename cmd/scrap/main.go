@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	document_service "licor_model/core/modules/document/service"
