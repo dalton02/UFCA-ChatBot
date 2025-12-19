@@ -8,10 +8,19 @@ type LoginRequestDto struct {
 }
 
 type RegisterRequestDto struct {
-	Name     string `json:"name" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,strongpassword"`
+	Name     string   `json:"name" validate:"required"`
+	Email    string   `json:"email" validate:"required,email"`
+	Role     RoleEnum `json:"role"`
+	Password string   `json:"password" validate:"required,strongpassword"`
 }
+
+type RoleEnum string
+
+const (
+	Student RoleEnum = "student"
+	Helper  RoleEnum = "helper"
+	Manager RoleEnum = "manager"
+)
 
 type AuthResponseDto struct {
 	Token string  `json:"token"`
@@ -19,9 +28,10 @@ type AuthResponseDto struct {
 }
 
 type UserDto struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID    string   `json:"id"`
+	Name  string   `json:"name"`
+	Email string   `json:"email"`
+	Role  RoleEnum `json:"role"`
 	util_dto.TimeStampDefaultDB
 }
 

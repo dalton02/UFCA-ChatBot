@@ -2,6 +2,7 @@ package scrapper_service
 
 import (
 	"fmt"
+	document_dto "licor_model/core/modules/document/dto"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -117,7 +118,7 @@ func (s *ScrapperService) saveSection(baseName, sectionName, content, url string
 	docName := fmt.Sprintf("%s / %s", baseName, sectionName)
 
 	fmt.Printf("Salvando Documento: %s (Tamanho: %d)\n", docName, len(content))
-	err := s.docsService.UpsertDocument(docName, content, url)
+	err := s.docsService.UpsertDocument(docName, content, url, document_dto.Wikiversity)
 	if err != nil {
 		fmt.Printf("Erro ao salvar documento %s: %s\n", docName, err.Error())
 	}

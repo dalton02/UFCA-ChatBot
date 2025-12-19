@@ -26,8 +26,8 @@ func (r *AuthRepository) CreateUser(user auth_dto.RegisterRequestDto, hashedPass
 
 	query, args, err := r.builder.
 		Insert("user").
-		Cols("id", "name", "email", "password").
-		Vals(goqu.Vals{id, user.Name, user.Email, hashedPassword}).
+		Cols("id", "name", "email", "password", "role").
+		Vals(goqu.Vals{id, user.Name, user.Email, hashedPassword, user.Role}).
 		ToSQL()
 
 	if err != nil {
@@ -59,13 +59,20 @@ func (r *AuthRepository) GetUserByEmail(email string) (auth_dto.UserDto, string,
 	return user, password, err
 
 }
+func (r *AuthRepository) EditUserPassword(email string, password string) error {
+
+	query := `UPDATE "user" SET password = $1 WHERE email=$2`
+
+	_, err := r.executor.Exec(query, password, email)
+	return err
+}
 
 func (r *AuthRepository) GetUserByID(id string) (auth_dto.UserDto, error) {
 	var user auth_dto.UserDto
 
 	sql, args, err := r.builder.
 		From("user").
-		Select("id", "name", "email", "created_at", "updated_at").
+		Select("id", "name", "email", "role", "created_at", "updated_at").
 		Where(goqu.Ex{"id": id}).
 		ToSQL()
 
@@ -74,7 +81,7 @@ func (r *AuthRepository) GetUserByID(id string) (auth_dto.UserDto, error) {
 	}
 
 	row := r.executor.QueryRow(sql, args...)
-	err = row.Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+	err = row.Scan(&user.ID, &user.Name, &user.Email, &user.Role, &user.CreatedAt, &user.UpdatedAt)
 
 	return user, err
 }

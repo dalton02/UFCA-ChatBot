@@ -5,6 +5,7 @@ import (
 	"fmt"
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_repository "licor_model/core/modules/chat/repository"
+	document_dto "licor_model/core/modules/document/dto"
 	ollama_dto "licor_model/core/modules/ollama/dto"
 	ai_service "licor_model/core/modules/ollama/service"
 	"licor_model/core/util/executor"
@@ -19,9 +20,9 @@ func (s *ChatService) ListMessages(filters chat_dto.QueryListMessageDto, chatID 
 	return s.repo.ListMessages(filters, chatID)
 }
 
-func (s *ChatService) SaveMessage(ctx *gin.Context, message chat_dto.CreateMensagemDto, chatID string) (response chat_dto.ResponseNewMessage, err error) {
+func (s *ChatService) SaveMessage(ctx *gin.Context, message chat_dto.CreateMensagemDto, chatID string, origins []document_dto.OriginEnum) (response chat_dto.ResponseNewMessage, err error) {
 
-	documents, err := s.docService.GetDocumentsBySimiliarity(message.Content)
+	documents, err := s.docService.GetDocumentsBySimiliarity(message.Content, origins)
 	if err != nil {
 		return response, err
 	}

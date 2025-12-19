@@ -6,6 +6,7 @@ import (
 	"licor_model/core/util/executor"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/lib/pq"
 	"github.com/segmentio/ksuid"
 )
 
@@ -21,11 +22,19 @@ func NewDocumentRepository(exec executor.Executor) *DocumentRepository {
 	}
 }
 
-func (r *DocumentRepository) GetDocumentByContext(context string) (document_dto.DocumentDto, error) {
+func (r *DocumentRepository) DeleteAllDocumentsFromOrigin(origin document_dto.OriginEnum) error {
+
+	query := `DELETE FROM document WHERE origin = $1`
+	_, err := r.executor.Exec(query, origin)
+	return err
+
+}
+
+func (r *DocumentRepository) GetDocumentByContextAndOrigin(context string, origin document_dto.OriginEnum) (document_dto.DocumentDto, error) {
 
 	var document document_dto.DocumentDto
-	query := `SELECT context,content,link,id FROM document WHERE context=$1`
-	result := r.executor.QueryRow(query, context)
+	query := `SELECT context,content,link,id FROM document WHERE context=$1 AND origin = $2`
+	result := r.executor.QueryRow(query, context, origin)
 
 	err := result.Scan(&document.Context, &document.Content, &document.Link, &document.ID)
 	if err != nil {
@@ -34,9 +43,13 @@ func (r *DocumentRepository) GetDocumentByContext(context string) (document_dto.
 	return document, nil
 }
 
-func (r *DocumentRepository) GetDocumentsBySimiliarity(vetor string) (docs []document_dto.DocumentDto, err error) {
-	query := `SELECT context,content,link FROM document ORDER BY embedding <-> ` + vetor + ` LIMIT 8`
-	result, err := r.executor.Query(query)
+func (r *DocumentRepository) GetDocumentsBySimiliarity(vetor string, origins []document_dto.OriginEnum) (docs []document_dto.DocumentDto, err error) {
+	if len(origins) == 0 {
+		return docs, nil
+	}
+
+	query := `SELECT context,content,link FROM document WHERE origin = ANY($1) ORDER BY embedding <-> ` + vetor + ` LIMIT 8`
+	result, err := r.executor.Query(query, pq.Array(origins))
 	if err != nil {
 		return docs, err
 	}
@@ -48,16 +61,16 @@ func (r *DocumentRepository) GetDocumentsBySimiliarity(vetor string) (docs []doc
 	return docs, nil
 }
 
-func (r *DocumentRepository) CreateDocument(context string, content string, link string, vetorSQL string) error {
+func (r *DocumentRepository) CreateDocument(context, content, link, vetorSQL string, origin document_dto.OriginEnum) error {
 	id := ksuid.New().String()
-	queryInsert := `INSERT INTO document (id,context,content,link,embedding) VALUES ($1,$2,$3,$4,` + vetorSQL + `)`
-	_, err := r.executor.Exec(queryInsert, id, context, content, link)
+	queryInsert := `INSERT INTO document (id,context,content,link,origin,embedding) VALUES ($1,$2,$3,$4,$5,` + vetorSQL + `)`
+	_, err := r.executor.Exec(queryInsert, id, context, content, link, origin)
 	return err
 }
 
 // UpdateDocument atualiza um documento existente pelo ID
 func (r *DocumentRepository) UpdateDocument(doc document_dto.DocumentDto, vetorSQL string) error {
-	queryUpdate := `UPDATE document SET context = $1, content = $2, link = $3, embedding = ` + vetorSQL + ` WHERE id = $4`
-	_, err := r.executor.Exec(queryUpdate, doc.Context, doc.Content, doc.Link, doc.ID)
+	queryUpdate := `UPDATE document SET context = $1, content = $2, link = $3, origin = $4, embedding = ` + vetorSQL + ` WHERE id = $5`
+	_, err := r.executor.Exec(queryUpdate, doc.Context, doc.Content, doc.Link, doc.Origin, doc.ID)
 	return err
 }

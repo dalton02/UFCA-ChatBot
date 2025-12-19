@@ -2,6 +2,7 @@ package scrapper_service
 
 import (
 	"fmt"
+	document_dto "licor_model/core/modules/document/dto"
 	document_service "licor_model/core/modules/document/service"
 	"strings"
 
@@ -42,7 +43,7 @@ func (s *ScrapperService) Init() {
 
 	materias := strings.Join(s.memory.Materias, " - ")
 
-	s.docsService.UpsertDocument("[CADEIRAS DISPONIVEIS DO CURSO]-[MATERIAS DISPONIVEIS DO CURSO]", materias, "https://pt.wikiversity.org/wiki/CCT-UFCA/Ci%C3%AAncia_da_Computa%C3%A7%C3%A3o")
+	s.docsService.UpsertDocument("[CADEIRAS DISPONIVEIS DO CURSO]-[MATERIAS DISPONIVEIS DO CURSO]", materias, "https://pt.wikiversity.org/wiki/CCT-UFCA/Ci%C3%AAncia_da_Computa%C3%A7%C3%A3o", document_dto.Wikiversity)
 
 	fmt.Println("All finished", s.memory.Materias)
 

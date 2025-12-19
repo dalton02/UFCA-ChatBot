@@ -15,7 +15,10 @@ type AuthService struct {
 }
 
 func NewAuthService() *AuthService {
-	return &AuthService{repo: auth_repository.NewAuthRepository(executor.NewDBExecutor(nil))}
+
+	service := &AuthService{repo: auth_repository.NewAuthRepository(executor.NewDBExecutor(nil))}
+
+	return service
 }
 
 func (s *AuthService) GetUserByID(id string) (auth_dto.UserDto, error) {
@@ -40,6 +43,7 @@ func (s *AuthService) Register(registerDto auth_dto.RegisterRequestDto) (auth_dt
 		return response, err
 	}
 
+	registerDto.Role = auth_dto.Student
 	userID, err := s.repo.CreateUser(registerDto, string(hashedPassword))
 	if err != nil {
 		return response, err
@@ -67,12 +71,10 @@ func (s *AuthService) Register(registerDto auth_dto.RegisterRequestDto) (auth_dt
 
 func (s *AuthService) Login(loginDto auth_dto.LoginRequestDto) (auth_dto.AuthResponseDto, error) {
 	var response auth_dto.AuthResponseDto
-
 	user, hashedPassword, err := s.repo.GetUserByEmail(loginDto.Email)
 	if err != nil {
 		return response, errors.New("credenciais inválidas")
 	}
-
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginDto.Password))
 	if err != nil {
 		return response, errors.New("credenciais inválidas")

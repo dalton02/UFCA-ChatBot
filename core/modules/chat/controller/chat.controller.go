@@ -5,6 +5,7 @@ import (
 	chat_dto "licor_model/core/modules/chat/dto"
 	chat_middleware "licor_model/core/modules/chat/middleware"
 	chat_service "licor_model/core/modules/chat/service"
+	document_dto "licor_model/core/modules/document/dto"
 	util_dto "licor_model/core/util/dto"
 	"licor_model/core/util/interceptor"
 	"time"
@@ -84,7 +85,7 @@ func (c *ChatController) SendMessage(ctx *gin.Context) {
 
 	chatID, _ := ctx.Params.Get("chatID")
 
-	response, err := c.chatService.SaveMessage(ctx, message, chatID)
+	response, err := c.chatService.SaveMessage(ctx, message, chatID, []document_dto.OriginEnum{document_dto.Wikiversity, document_dto.JsonStudents})
 
 	if err != nil {
 		interceptor.AppBadRequest(ctx, err.Error())

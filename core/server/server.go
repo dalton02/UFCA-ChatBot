@@ -47,17 +47,10 @@ func StartEngine() {
 	}
 
 	routes = &RoutesH{
-		Engine: gin.New(),
+		Engine: gin.Default(),
 	}
 
 	routes.Engine.Use(shared.Cors)
-	routes.Engine.Use(func(c *gin.Context) {
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-		c.Next()
-	})
 
 	routes.Engine.Use(gin.Recovery())
 

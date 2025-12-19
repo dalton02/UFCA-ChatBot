@@ -2,6 +2,7 @@ package scrapper_service
 
 import (
 	"fmt"
+	document_dto "licor_model/core/modules/document/dto"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -27,23 +28,23 @@ func (s *ScrapperService) InfoCadeiraDetalhes() {
 			if h2Ementa.Length() > 0 {
 				contextName := baseContext + "EMENTA"
 				syllabus := s.GetParagraphsAfter(div)
-				s.docsService.UpsertDocument(contextName, syllabus, pagina.Request.URL.String())
+				s.docsService.UpsertDocument(contextName, syllabus, pagina.Request.URL.String(), document_dto.Wikiversity)
 			}
 			if h2Objetivos.Length() > 0 {
 				contextName := baseContext + "OBJETIVOS"
 				objective := s.GetParagraphsAfter(div)
-				s.docsService.UpsertDocument(contextName, objective, pagina.Request.URL.String())
+				s.docsService.UpsertDocument(contextName, objective, pagina.Request.URL.String(), document_dto.Wikiversity)
 			}
 
 			if h2Avalicao.Length() > 0 {
 				contextName := baseContext + "AVALIACAO"
 				content := s.GetParagraphsAfter(div)
-				s.docsService.UpsertDocument(contextName, content, pagina.Request.URL.String())
+				s.docsService.UpsertDocument(contextName, content, pagina.Request.URL.String(), document_dto.Wikiversity)
 			}
 			if h2Metodologia.Length() > 0 {
 				contextName := baseContext + "METODOLOGIA"
 				content := s.GetParagraphsAfter(div)
-				s.docsService.UpsertDocument(contextName, content, pagina.Request.URL.String())
+				s.docsService.UpsertDocument(contextName, content, pagina.Request.URL.String(), document_dto.Wikiversity)
 			}
 		})
 	})

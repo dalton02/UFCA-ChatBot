@@ -2,6 +2,7 @@ package scrapper_service
 
 import (
 	"fmt"
+	document_dto "licor_model/core/modules/document/dto"
 	"strconv"
 	"strings"
 
@@ -57,7 +58,7 @@ func (s *ScrapperService) InfoGeralCurso() {
 			builder.WriteString("-PARTE-")
 			builder.WriteString(strconv.Itoa(i))
 
-			err := s.docsService.UpsertDocument(builder.String(), h.Text, e.Request.URL.String())
+			err := s.docsService.UpsertDocument(builder.String(), h.Text, e.Request.URL.String(), document_dto.Wikiversity)
 			if err != nil {
 				fmt.Println(err.Error())
 
