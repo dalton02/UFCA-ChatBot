@@ -30,7 +30,6 @@ func (service *JsonBinService) SaveContext(userEmail string, data []jsonbin_dto.
 
 func (service *JsonBinService) GetFromPath(year, month, day int, filename string) ([]jsonbin_dto.JsonFile, error) {
 
-	fmt.Println("aaaa")
 	path := service.makePathWithDate(year, month, day, filename)
 	data, err := service.readJsonFile(path)
 	if err != nil {

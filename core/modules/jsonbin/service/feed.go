@@ -20,8 +20,6 @@ func (service *JsonBinService) FeedFromFile(year int, month int, day int, filena
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(data)
 	for _, d := range data {
 
 		err = service.documentService.UpsertDocument(d.Context, d.Content, "", document_dto.JsonStudents)

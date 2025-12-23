@@ -1,14 +1,12 @@
 package jsonbin_service
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	jsonbin_dto "licor_model/core/modules/jsonbin/dto"
+	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -80,6 +78,6 @@ func (service *JsonBinService) saveJsonFile(path string, data []jsonbin_dto.Json
 }
 
 func (service *JsonBinService) userKey(email string) string {
-	hash := sha256.Sum256([]byte(strings.ToLower(strings.TrimSpace(email))))
-	return hex.EncodeToString(hash[:8])
+	encoded := url.QueryEscape(email)
+	return encoded
 }
